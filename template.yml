@@ -1,0 +1,160 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Metadata:
+  RepoUrl: https://bitbucket.airnz.co.nz/projects/EMT/repos/navx
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - Label:
+          default: Miner Configuration
+        Parameters:
+        - EthWallet
+
+      - Label:
+          default: Instance Configuration
+        Parameters:
+        - InstanceType
+        - InstanceAmi
+        - SshKeyName
+
+      - Label:
+          default: Networking Configuration
+        Parameters:
+        - VpcId
+        - SubnetId
+        - AccessCidr
+
+Parameters:
+  InstanceType:
+    Type: String
+    AllowedValues:
+    - t3a.small # Config testing only
+    - g3.xlarge
+    - g3.8xlarge
+    - p2.xlarge
+    - p2.8xlarge
+    Default: g3.xlarge
+
+  SshKeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Default: aws-sandpit
+
+  InstanceAmi:
+    Type: AWS::EC2::Image::Id
+    Description: Deep Learning AMI (Ubuntu 18.04) in the current region
+    Default: ami-0bc87a16c757a7f07   # Deep Learning AMI (Ubuntu 18.04) Version 36.0 (us-west-2)
+
+  EthWallet:
+    Type: String
+    Description: Ethereum Wallet Address
+    Default: "0x99b36B44cf319c9E0ed4619ee2050B21ECac2c15"
+    AllowedPattern: "0x[0-9a-fA-F]+"
+
+  VpcId:
+    Description: The VPC where this stack will be deployed
+    Type: AWS::EC2::VPC::Id
+    Default: vpc-091cd571
+
+  SubnetId:
+    Description: The subnet where this instance will be deployed
+    Type: AWS::EC2::Subnet::Id
+    Default: subnet-2eefab65
+
+  AccessCidr:
+    Type: String
+    Default: 210.54.38.87/32
+
+Conditions:
+  HaveSshKey: !Not [ !Equals [ !Ref SshKeyName, "" ] ]
+
+Resources:
+
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub '${AWS::StackName}-instance-role'
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+      - !Ref InstanceRole
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        #BlockDeviceMappings:
+        #  - DeviceName: /dev/sdb
+        #    Ebs:
+        #      DeleteOnTermination: true
+        #      Encrypted: true
+        #      VolumeSize: 16
+        #      VolumeType: gp2
+        IamInstanceProfile:
+          Arn: !GetAtt InstanceProfile.Arn
+        InstanceType: !Ref InstanceType
+        ImageId: !Ref InstanceAmi
+        KeyName: !If [ HaveSshKey, !Ref SshKeyName, !Ref "AWS::NoValue" ]
+        UserData:
+          'Fn::Base64':
+            'Fn::Sub': |
+                #!/bin/bash -x
+                cd /tmp
+                wget -O ethminer.tar.gz https://github.com/ethereum-mining/ethminer/releases/download/v0.19.0-alpha.0/ethminer-0.19.0-alpha.0-cuda-9-linux-x86_64.tar.gz
+                tar xvfz ethminer.tar.gz
+                cd bin
+                nohup ./ethminer -P stratums://${EthWallet}@us2.ethermine.org:5555
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: !Ref AWS::StackName
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: !Ref AccessCidr
+      SecurityGroupEgress:
+      - IpProtocol: -1
+        CidrIp: 0.0.0.0/0
+      Tags:
+      - Key: Name
+        Value: !Ref AWS::StackName
+
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      Monitoring: true
+      SecurityGroupIds:
+      - !Ref SecurityGroup
+      SubnetId: !Ref SubnetId
+      Tags:
+      - Key: Name
+        Value: !Ref AWS::StackName
+
+  NotificationTopic:
+    Type: AWS::SNS::Topic
+
+Outputs:
+  InstanceIp:
+    Description: Instance IP address
+    Value: !GetAtt Instance.PublicIp
+
+  NotificationTopic:
+    Description: Monitoring notification topic
+    Value: !Ref NotificationTopic
