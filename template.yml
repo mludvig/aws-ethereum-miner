@@ -23,10 +23,47 @@ Metadata:
         - SubnetIds
         - AccessCidr
 
+Mappings:
+  # ImageId of 'Deep Learning AMI (Ubuntu 18.04) Version 36.0' in each region
+  RegionMap:
+    ap-northeast-1:
+      ImageId: ami-03b8cfea5460e4881
+    ap-northeast-2:
+      ImageId: ami-07e004f63a0cccdd3
+    ap-south-1:
+      ImageId: ami-02cb047909c100c3d
+    ap-southeast-1:
+      ImageId: ami-068f673b54015684e
+    ap-southeast-2:
+      ImageId: ami-0f558ede443627831
+    ca-central-1:
+      ImageId: ami-0ca5bba27cf7db8f0
+    eu-central-1:
+      ImageId: ami-01227276a4e5a4a31
+    eu-north-1:
+      ImageId: ami-080691999cd85e762
+    eu-west-1:
+      ImageId: ami-006ff58f5247c50eb
+    eu-west-2:
+      ImageId: ami-096a6497745975f89
+    eu-west-3:
+      ImageId: ami-0346672391424d8e5
+    sa-east-1:
+      ImageId: ami-048837a0bfc1ba1a6
+    us-east-1:
+      ImageId: ami-063585f0e06d22308
+    us-east-2:
+      ImageId: ami-01bd6a1621a6968d7
+    us-west-1:
+      ImageId: ami-05fbe06ba1b862ef6
+    us-west-2:
+      ImageId: ami-0bc87a16c757a7f07
+
 Parameters:
   InstanceType:
     Type: String
     AllowedValues:
+    ## The commented-out are not worth it - too slow for the price
     #- g3s.xlarge    # 1 GPU Tesla M60
     #- g3.8xlarge    # 2 GPU Tesla M60
     - g4dn.xlarge   # 1 GPU Tesla T4 -- best value (cost/performance)
@@ -36,7 +73,7 @@ Parameters:
     #- p2.16xlarge   # 16 GPU Tesla K80
     - p3.2xlarge    # 1 GPU Tesla V100
     - p3.8xlarge    # 4 GPU Tesla V100
-    #- p3.16xlarge   # 8 GPU Tesla V100
+    - p3.16xlarge   # 8 GPU Tesla V100
     Default: g4dn.xlarge
 
   InstanceCount:
@@ -48,10 +85,10 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
     Default: aws-sandpit
 
-  InstanceAmi:
-    Type: AWS::EC2::Image::Id
-    Description: Deep Learning AMI (Ubuntu 18.04) in the current region
-    Default: ami-0bc87a16c757a7f07   # Deep Learning AMI (Ubuntu 18.04) Version 36.0 (us-west-2)
+  #InstanceAmi:
+  #  Type: AWS::EC2::Image::Id
+  #  Description: Deep Learning AMI (Ubuntu 18.04) in the current region
+  #  Default: ami-0bc87a16c757a7f07   # Deep Learning AMI (Ubuntu 18.04) Version 36.0 (us-west-2)
 
   EthWallet:
     Type: String
@@ -62,12 +99,10 @@ Parameters:
   VpcId:
     Description: The VPC where this stack will be deployed
     Type: AWS::EC2::VPC::Id
-    Default: vpc-091cd571
 
   SubnetIds:
-    Description: The subnet where this instance will be deployed
+    Description: The subnets where the instances will be deployed - at least 3 subnets!
     Type: List<AWS::EC2::Subnet::Id>
-    Default: subnet-620d3838,subnet-2e2b7157,subnet-2eefab65
 
   AccessCidr:
     Type: String
@@ -78,7 +113,7 @@ Resources:
   InstanceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub '${AWS::StackName}-instance-role'
+      #RoleName: !Sub '${AWS::StackName}-instance-role'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -104,7 +139,8 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
         InstanceType: !Ref InstanceType
-        ImageId: !Ref InstanceAmi
+        #ImageId: !Ref InstanceAmi
+        ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", ImageId ]
         KeyName: !Ref SshKeyName
         SecurityGroupIds:
         - !Ref SecurityGroup
