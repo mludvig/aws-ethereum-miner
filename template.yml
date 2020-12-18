@@ -14,14 +14,12 @@ Metadata:
         Parameters:
         - InstanceType
         - InstanceAmi
-        - SshKeyName
 
       - Label:
           default: Networking Configuration
         Parameters:
         - VpcId
         - SubnetIds
-        - AccessCidr
 
 Parameters:
   InstanceType:
@@ -43,17 +41,8 @@ Parameters:
 
   InstanceCount:
     Type: Number
-    Default: 1
+    Default: 5
     MaxValue: 10
-
-  SshKeyName:
-    Type: AWS::EC2::KeyPair::KeyName
-    Default: aws-sandpit
-
-  #InstanceAmi:
-  #  Type: AWS::EC2::Image::Id
-  #  Description: Deep Learning AMI (Ubuntu 18.04) in the current region
-  #  Default: ami-0bc87a16c757a7f07   # Deep Learning AMI (Ubuntu 18.04) Version 36.0 (us-west-2)
 
   EthWallet:
     Type: String
@@ -68,10 +57,6 @@ Parameters:
   SubnetIds:
     Description: The subnets where the instances will be deployed - at least 3 subnets!
     Type: List<AWS::EC2::Subnet::Id>
-
-  AccessCidr:
-    Type: String
-    Default: 210.54.38.87/32
 
 Mappings:
   # ImageId of 'Deep Learning AMI (Ubuntu 18.04) Version 36.0' in each region
@@ -128,7 +113,6 @@ Resources:
   InstanceRole:
     Type: AWS::IAM::Role
     Properties:
-      #RoleName: !Sub '${AWS::StackName}-instance-role'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -159,9 +143,7 @@ Resources:
             SpotInstanceType: one-time
             MaxPrice: !FindInMap [ SpotPriceMap, !Ref InstanceType, MaxPrice ]
         InstanceType: !Ref InstanceType
-        #ImageId: !Ref InstanceAmi
         ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", ImageId ]
-        KeyName: !Ref SshKeyName
         SecurityGroupIds:
         - !Ref SecurityGroup
         UserData:
@@ -195,11 +177,6 @@ Resources:
     Properties:
       GroupDescription: !Ref AWS::StackName
       VpcId: !Ref VpcId
-      SecurityGroupIngress:
-      - IpProtocol: tcp
-        FromPort: 22
-        ToPort: 22
-        CidrIp: !Ref AccessCidr
       SecurityGroupEgress:
       - IpProtocol: -1
         CidrIp: 0.0.0.0/0
