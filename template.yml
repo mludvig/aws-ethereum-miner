@@ -160,7 +160,7 @@ Resources:
                 SERVERS=(us1 us2 eu1 asia1)
                 while (true); do
                   PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
-                  ./ethminer \
+                  ./ethminer -G \
                     -P stratums://${EthWallet}.${!INSTANCE_ID}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
                     -P stratums://${EthWallet}.${!INSTANCE_ID}@us1.ethermine.org:5555 \
                     -P stratums://${EthWallet}.${!INSTANCE_ID}@us2.ethermine.org:5555 \
