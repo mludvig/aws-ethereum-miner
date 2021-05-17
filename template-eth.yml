@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Metadata:
-  RepoUrl: https://bitbucket.airnz.co.nz/projects/EMT/repos/navx
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
