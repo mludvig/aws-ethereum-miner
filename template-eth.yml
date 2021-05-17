@@ -150,22 +150,17 @@ Resources:
             'Fn::Sub': |
                 #!/bin/bash -x
                 cd /tmp
-                INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
-                wget -O ethminer.tar.gz https://github.com/ethereum-mining/ethminer/releases/download/v0.18.0/ethminer-0.18.0-cuda-9-linux-x86_64.tar.gz
-                tar xvfz ethminer.tar.gz
-                cd bin
+                INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id | cut -b-8)
+                AZ_ID=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone-id)
+                wget -O lolminer.tar.gz https://github.com/Lolliedieb/lolMiner-releases/releases/download/1.28/lolMiner_v1.28a_Lin64.tar.gz
+                tar xvfz lolminer.tar.gz
+                cd 1.28a
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
                 SERVERS=(us1 us2 eu1 asia1)
                 while (true); do
-                  PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
-                  ./ethminer \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@us1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@us2.ethermine.org:5555 \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@eu1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@asia1.ethermine.org:5555 \
-                  >> /tmp/ethminer.log 2>&1
+                  ./lolMiner --algo ETHASH --pool us1.ethermine.org:5555 --tls on --user ${EthWallet}.${!INSTANCE_ID}-${!AZ_ID}
+                  ./lolMiner --algo ETHASH --pool us2.ethermine.org:5555 --tls on --user ${EthWallet}.${!INSTANCE_ID}-${!AZ_ID}
                 done
                 __EOF__
                 chmod +x runner.sh
