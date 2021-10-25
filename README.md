@@ -2,12 +2,14 @@
 
 CloudFormation template for mining Ethereum (ETH) crypto currency on AWS GPU-enabled EC2 instances
 
+<img align="right" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ethereum_logo_2014.svg/128px-Ethereum_logo_2014.svg.png"/>
+
 ## Important!
 
 - Read about the profitability on AWS mining in my article [Mining Bitcoin and other crypto on 
 AWS](https://michael-ludvig.medium.com/mining-bitcoin-and-other-crypto-on-aws-eb172940059f) first!
 
-- Reach out to me if you need help with any customisation, e.g. to add support for other crypto currencies, etc.
+- [Reach out to me](../../issues) if you need help with any customisation, e.g. to add support for other crypto currencies, etc.
 
 ## What does the template do?
 
