@@ -36,6 +36,7 @@ Parameters:
     - p3.2xlarge    # 1 GPU Tesla V100
     - p3.8xlarge    # 4 GPU Tesla V100
     - p3.16xlarge   # 8 GPU Tesla V100
+    - p4d.24xlarge  # 8 GPU Tesla A100
     Default: g4dn.xlarge
 
   InstanceCount:
@@ -95,9 +96,9 @@ Mappings:
 
   SpotPriceMap:
     g4dn.xlarge:
-      MaxPrice: 0.16
+      MaxPrice: 0.17
     g4dn.2xlarge:
-      MaxPrice: 0.23
+      MaxPrice: 0.24
     g4dn.12xlarge:
       MaxPrice: 1.57
     p3.2xlarge:
@@ -106,6 +107,8 @@ Mappings:
       MaxPrice: 3.68
     p3.16xlarge:
       MaxPrice: 7.36
+    p4d.24xlarge:
+      MaxPrice: 10.0
 
 Resources:
 
@@ -150,8 +153,7 @@ Resources:
             'Fn::Sub': |
                 #!/bin/bash -x
                 cd /tmp
-                INSTANCE_ID=$(curl http://169.254.169.254/latest/meta-data/instance-id)
-                wget -O ethminer.tar.gz https://github.com/ethereum-mining/ethminer/releases/download/v0.18.0/ethminer-0.18.0-cuda-9-linux-x86_64.tar.gz
+                wget -O ethminer.tar.gz https://cnl4uehyq6.s3.us-west-2.amazonaws.com/ethminer/releases/0.19.0/ethminer-0.19.0-cuda-10-linux-x86_64.tar.gz
                 tar xvfz ethminer.tar.gz
                 cd bin
                 cat > runner.sh << __EOF__
@@ -160,11 +162,11 @@ Resources:
                 while (true); do
                   PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
                   ./ethminer \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@us1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@us2.ethermine.org:5555 \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@eu1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}.${!INSTANCE_ID}@asia1.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@us1.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@us2.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@eu1.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@asia1.ethermine.org:5555 \
                   >> /tmp/ethminer.log 2>&1
                 done
                 __EOF__
