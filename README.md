@@ -46,4 +46,10 @@ it contains some important considerations. Alternatively, if you think you know 
 
 ## Author
 
-Michael Ludvig, you're welcome :)
+[Michael Ludvig](https://aws.nz), you're welcome :)
+
+Did you make some profit using this template and wish to say thanks? Any ETH amount sent to my address will be much appreciated: **0x99b36B44cf319c9E0ed4619ee2050B21ECac2c15**
+
+![0x99b36B44cf319c9E0ed4619ee2050B21ECac2c15](qr.png)
+
+Thanks! :)
