@@ -1,4 +1,4 @@
-# Use this template if you wish to stand up the instances in a custom VPC
+# Use this template if you wish to stand up the instances in the "Default VPC"
 
 AWSTemplateFormatVersion: '2010-09-09'
 
@@ -16,12 +16,6 @@ Metadata:
         Parameters:
         - InstanceType
         - InstanceCount
-
-      - Label:
-          default: Networking Configuration
-        Parameters:
-        - VpcId
-        - SubnetIds
 
 Parameters:
   InstanceType:
@@ -52,14 +46,6 @@ Parameters:
     Description: Ethereum Wallet Address
     Default: "0x99b36B44cf319c9E0ed4619ee2050B21ECac2c15"
     AllowedPattern: "0x[0-9a-fA-F]+"
-
-  VpcId:
-    Description: The VPC where this stack will be deployed
-    Type: AWS::EC2::VPC::Id
-
-  SubnetIds:
-    Description: The subnets where the instances will be deployed - at least 3 subnets!
-    Type: List<AWS::EC2::Subnet::Id>
 
 Mappings:
   # ImageId of 'Deep Learning AMI (Ubuntu 18.04) Version 36.0' in each region
@@ -149,8 +135,6 @@ Resources:
             #MaxPrice: !FindInMap [ SpotPriceMap, !Ref InstanceType, MaxPrice ]
         InstanceType: !Ref InstanceType
         ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", ImageId ]
-        SecurityGroupIds:
-        - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
             'Fn::Sub': |
@@ -176,18 +160,6 @@ Resources:
                 chmod +x runner.sh
                 nohup ./runner.sh &
 
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Ref AWS::StackName
-      VpcId: !Ref VpcId
-      SecurityGroupEgress:
-      - IpProtocol: -1
-        CidrIp: 0.0.0.0/0
-      Tags:
-      - Key: Name
-        Value: !Ref AWS::StackName
-
   MinerAsg:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
@@ -198,8 +170,8 @@ Resources:
       MaxSize: !Ref InstanceCount
       DesiredCapacity: !Ref InstanceCount
       CapacityRebalance: false
-      VPCZoneIdentifier: !Ref SubnetIds
-      HealthCheckGracePeriod: 300
+      AvailabilityZones: !GetAZs ""
+      HealthCheckGracePeriod: 900
       HealthCheckType: EC2
       TerminationPolicies:
       - ClosestToNextInstanceHour
