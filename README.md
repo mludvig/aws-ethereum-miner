@@ -1,3 +1,8 @@
+#PermissionOpenFileBitcoin
+#access file
+#<root>
+#true
+#preference file
 # AWS Ethereum miner
 
 CloudFormation template for mining Ethereum (ETH) crypto currency on AWS GPU-enabled EC2 instances
