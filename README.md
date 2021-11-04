@@ -41,7 +41,7 @@ export CODE=L-3819A6DF      # All G and VT Spot Instance Requests (for g4dn.xlar
 # export CODE=L-7212CCBC    # All P Spot Instance Requests (for p3.2xlarge, p3dn.24xlarge or p4d.24xlarge)
 export VCPUS=96             # 96 vCPUs - can accommodate e.g. 24x g4dn.xlarge or 1x p4d.24xlarge
 
-aws --region ${REGION} service-quotas request-service-quota-increase --service-code ec2 --quota-code ${CODE} --desired-value ${VCPUS}
+aws --region ${AWS_REGION} service-quotas request-service-quota-increase --service-code ec2 --quota-code ${CODE} --desired-value ${VCPUS}
 ```
 
 Choose the number of *vCPU* and the *Quota code* according to your needs.
