@@ -31,6 +31,13 @@ You will have an opportunity to check the stack details, enter the wallet addres
 
 ### Increase resource quotas
 
+All right you have created the stack but no instances seem to be running. If you navigate to *EC2* -> *Autoscaling groups* 
+-> *ethminer* -> *Events* tab you may see this error:
+
+> Failed: Launching a new EC2 instance.
+> 
+> Status Reason: **Max spot instance count exceeded.** Launching EC2 instance failed.
+
 AWS accounts have default limits (quotas) on some resources. You may find, for example, that your quota for 
 _All G and VT Spot Instance Requests_ in a particular region is *0* and you therefore can't start any `g4dn.xlarge` instances.
 It pays to request the quotas increase which can be done with this simple command (you can do this from the CloudShell):
