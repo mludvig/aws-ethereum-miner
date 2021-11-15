@@ -34,6 +34,7 @@ Parameters:
     - g4dn.xlarge   # 1 GPU Tesla T4 -- best value (cost/performance)
     - g4dn.2xlarge  # 1 GPU Tesla T4
     - g4dn.12xlarge # 4 GPU Tesla T4
+    - g4dn.metal    # 8 GPU Tesla T4
     #- p2.xlarge     # 1 GPU Tesla K80
     #- p2.8xlarge    # 8 GPU Tesla K80
     #- p2.16xlarge   # 16 GPU Tesla K80
@@ -214,7 +215,7 @@ Resources:
       DesiredCapacity: !Ref InstanceCount
       CapacityRebalance: false
       VPCZoneIdentifier: !Ref SubnetIds
-      HealthCheckGracePeriod: 300
+      HealthCheckGracePeriod: 900
       HealthCheckType: EC2
       TerminationPolicies:
       - ClosestToNextInstanceHour
