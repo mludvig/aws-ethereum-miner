@@ -1,0 +1,218 @@
+# Create ImageBuilder pipeline for building Ubuntu 20.04 + CUDA 11 image
+# It's far smaller than the DeepLearning AMI (15GB vs 100GB+) and supports the new G5 instances
+
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  InstallCudaComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: !Sub "${AWS::StackName}-install-cuda-11"
+      Description: Install CUDA 11
+      Platform: Linux
+      SupportedOsVersions:
+      - Ubuntu 20
+      Version: 1.0.0
+      Data: |
+        name: CudaInstallationUbuntu20
+        description: NVidia CUDA 11 installation on Ubuntu 20.04
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: CudaBuild
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+                    - mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+                    - apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/7fa2af80.pub
+                    - add-apt-repository "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/ /"
+                    - apt-get update
+                    - apt-get -y install cuda
+                    - apt-get clean
+          - name: validate
+            steps:
+              - name: CudaValidate
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - which nvidia-smi
+          - name: test
+            steps:
+              - name: CudaTest
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - which nvidia-smi
+
+  CleanupComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: !Sub "${AWS::StackName}-cleanup"
+      Description: Cleanup SSM
+      Platform: Linux
+      SupportedOsVersions:
+      - Ubuntu 20
+      Version: 1.0.0
+      Data: |
+        name: CleanupSSM
+        description: Cleanup SSM logs
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: CleanupBuild
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - rm -rfv /var/log/amazon/ssm/*.log /var/lib/amazon/ssm/i-*/session/orchestration/*
+                    - rm -rfv /var/log/cloud-init* /var/lib/cloud/instances/i-* /var/lib/cloud/instance
+
+  Infrastructure:
+    Type: AWS::ImageBuilder::InfrastructureConfiguration
+    Properties:
+      Name: !Ref AWS::StackName
+      InstanceProfileName: EC2InstanceProfileForImageBuilder
+
+  ImageRecipe:
+    Type: AWS::ImageBuilder::ImageRecipe
+    Properties:
+      Name: !Ref AWS::StackName
+      ParentImage: !Sub "arn:aws:imagebuilder:${AWS::Region}:aws:image/ubuntu-server-20-lts-x86/2021.11.19"
+      Components:
+      - ComponentArn: !Sub "arn:aws:imagebuilder:${AWS::Region}:aws:component/update-linux/1.0.2/1"
+      - ComponentArn: !Ref InstallCudaComponent
+      - ComponentArn: !Sub "arn:aws:imagebuilder:${AWS::Region}:aws:component/aws-cli-version-2-linux/1.0.3/1"
+      - ComponentArn: !Ref CleanupComponent
+      BlockDeviceMappings:
+      - DeviceName: /dev/sda1
+        Ebs:
+          VolumeSize: 15
+          VolumeType: gp3
+      Version: 1.0.0
+      WorkingDirectory: /tmp
+
+  DistributionConfig:
+    Type: AWS::ImageBuilder::DistributionConfiguration
+    Properties:
+      Name: !Ref AWS::StackName
+      Distributions:
+      # All regions where G4DN instances are available
+      - Region: ap-northeast-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-northeast-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-south-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-southeast-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-southeast-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ca-central-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-central-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-north-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-west-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-west-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-west-3
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: sa-east-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: us-east-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: us-east-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: us-west-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: us-west-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+
+  ## 'Image' resource immediately starts building the AMI
+  #Image:
+  #  Type: AWS::ImageBuilder::Image
+  #  Properties:
+  #    Name: !Ref AWS::StackName
+  #    InfrastructureConfigurationArn: !Ref Infrastructure
+  #    DistributionConfigurationArn: !Ref DistributionConfig
+  #    EnhancedImageMetadataEnabled: true
+  #    ImageRecipeArn: !Ref ImageRecipe
+
+  ImagePipeline:
+    Type: AWS::ImageBuilder::ImagePipeline
+    Properties:
+      Name: !Ref AWS::StackName
+      InfrastructureConfigurationArn: !Ref Infrastructure
+      DistributionConfigurationArn: !Ref DistributionConfig
+      EnhancedImageMetadataEnabled: true
+      ImageRecipeArn: !Ref ImageRecipe
