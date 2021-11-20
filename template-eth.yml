@@ -35,6 +35,9 @@ Parameters:
     - g4dn.2xlarge  # 1 GPU Tesla T4
     - g4dn.12xlarge # 4 GPU Tesla T4
     - g4dn.metal    # 8 GPU Tesla T4
+    - g5.xlarge     # 1 GPU Tesla A10g
+    - g5.12xlarge   # 4 GPU Tesla A10g
+    - g5.48xlarge   # 8 GPU Tesla A10g
     #- p2.xlarge     # 1 GPU Tesla K80
     #- p2.8xlarge    # 8 GPU Tesla K80
     #- p2.16xlarge   # 16 GPU Tesla K80
@@ -75,40 +78,40 @@ Conditions:
   UseSpot: !Equals [ !Ref PricingPlan, "spot" ]
 
 Mappings:
-  # ImageId of 'Deep Learning AMI (Ubuntu 18.04) Version 36.0' in each region
+  # ImageId of "cuda-11 2021-11-19T06-45-18.713Z" in each region
   RegionMap:
     ap-northeast-1:
-      ImageId: ami-03b8cfea5460e4881
+      ImageId: ami-057223d0b465ef6c8
     ap-northeast-2:
-      ImageId: ami-07e004f63a0cccdd3
+      ImageId: ami-04974804b5c32ad3f
     ap-south-1:
-      ImageId: ami-02cb047909c100c3d
+      ImageId: ami-0138f84dea0009e24
     ap-southeast-1:
-      ImageId: ami-068f673b54015684e
+      ImageId: ami-028fec8125dca56aa
     ap-southeast-2:
-      ImageId: ami-0f558ede443627831
+      ImageId: ami-07b457617d5ab5026
     ca-central-1:
-      ImageId: ami-0ca5bba27cf7db8f0
+      ImageId: ami-00cbba349f2627bef
     eu-central-1:
-      ImageId: ami-01227276a4e5a4a31
+      ImageId: ami-0527e1e1ca0929e8c
     eu-north-1:
-      ImageId: ami-080691999cd85e762
+      ImageId: ami-070fab14d346eec81
     eu-west-1:
-      ImageId: ami-006ff58f5247c50eb
+      ImageId: ami-052dfb972e5a6cdd0
     eu-west-2:
-      ImageId: ami-096a6497745975f89
+      ImageId: ami-0126c804cd6d92090
     eu-west-3:
-      ImageId: ami-0346672391424d8e5
+      ImageId: ami-0fe47281cdcb0102b
     sa-east-1:
-      ImageId: ami-048837a0bfc1ba1a6
+      ImageId: ami-0ad6f33841de28c4c
     us-east-1:
-      ImageId: ami-063585f0e06d22308
+      ImageId: ami-04822dc0e04836a86
     us-east-2:
-      ImageId: ami-01bd6a1621a6968d7
+      ImageId: ami-0b3cc42a259739f29
     us-west-1:
-      ImageId: ami-05fbe06ba1b862ef6
+      ImageId: ami-00158baf36cd6ace7
     us-west-2:
-      ImageId: ami-0bc87a16c757a7f07
+      ImageId: ami-013f60ec8ba5a9ca4
 
   #SpotPriceMap:
   #  g4dn.xlarge:
@@ -172,7 +175,7 @@ Resources:
             'Fn::Sub': |
                 #!/bin/bash -x
                 cd /tmp
-                wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-10-linux-x86_64.tar.gz
+                wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-11-linux-x86_64.tar.gz
                 tar xvfz ethminer.tar.gz
                 cd bin
                 cat > runner.sh << __EOF__
