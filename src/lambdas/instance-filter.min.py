@@ -2,6 +2,7 @@
 import json
 import boto3
 import urllib3
+import datetime
 http=urllib3.PoolManager()
 ec2=boto3.client("ec2")
 SUCCESS="SUCCESS"
@@ -40,6 +41,29 @@ def filter_available(types):
  types_available=list(map(lambda x:x["InstanceType"],result["InstanceTypeOfferings"]))
  print(f"Instance types available in this region: {' '.join(types_available)}")
  return True,types_available
+def sort_by_efficiency(attrs):
+ data={t['InstanceType']:t for t in attrs}
+ result=ec2.describe_spot_price_history(InstanceTypes=list(data.keys()),ProductDescriptions=['Linux/UNIX'],StartTime=datetime.datetime.now()-datetime.timedelta(minutes=1))
+ for r in result['SpotPriceHistory']:
+  t=r['InstanceType']
+  if '_count' not in data[t]:
+   data[t]['_count']=0
+   data[t]['_sum']=0.0
+  data[t]['_count']+=1
+  data[t]['_sum']+=float(r['SpotPrice'])
+ for t in data.keys():
+  data[t]['_spot']=data[t]['_sum']/data[t]['_count']
+  data[t]['_efficiency']=float(data[t].get('WeightedCapacity',1))/data[t]['_spot']
+  del data[t]['_sum']
+  del data[t]['_count']
+ attrs=list(data.values())
+ attrs.sort(key=lambda x:(-x["_efficiency"],x['_spot']))
+ print(f"Instances sorted: {json.dumps(attrs)}")
+ for a in attrs:
+  for key in list(a.keys()):
+   if key.startswith("_"):
+    del a[key]
+ return attrs
 def lambda_handler(event,context):
  print("== EVENT ==")
  print(json.dumps(event))
@@ -62,9 +86,11 @@ def lambda_handler(event,context):
   attrs=list(filter(lambda x:x["InstanceType"]in types_available,attrs))
   if not attrs:
    raise Exception("None of the requested instance types is available in this region!")
+  attrs=sort_by_efficiency(attrs)
+  types_sorted=list(map(lambda x:x["InstanceType"],attrs))
  except Exception as e:
   send(event,context,FAILED,reason=f"Error: {e}")
   return False
- send(event,context,SUCCESS,{"InstanceTypeNames":",".join(types_available),"InstanceTypeAttributes":attrs,},)
+ send(event,context,SUCCESS,{"InstanceTypeNames":" ".join(types_sorted),"InstanceTypeAttributes":attrs,},)
 # Created by pyminifier (https://github.com/liftoff/pyminifier)
 

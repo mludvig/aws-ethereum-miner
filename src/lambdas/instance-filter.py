@@ -9,6 +9,7 @@
 import json
 import boto3
 import urllib3
+import datetime
 
 http = urllib3.PoolManager()
 ec2 = boto3.client("ec2")
@@ -82,6 +83,46 @@ def filter_available(types):
     return True, types_available
 
 
+def sort_by_efficiency(attrs):
+    data = { t['InstanceType']: t for t in attrs }
+
+    # Retrieve current spot prices
+    result = ec2.describe_spot_price_history(
+        InstanceTypes=list(data.keys()),
+        ProductDescriptions=['Linux/UNIX'],
+        StartTime=datetime.datetime.now()-datetime.timedelta(minutes=1)
+    )
+
+    # Calculate average spot price for each instance
+    for r in result['SpotPriceHistory']:
+        t = r['InstanceType']
+        if '_count' not in data[t]:
+            data[t]['_count'] = 0
+            data[t]['_sum'] = 0.0
+        data[t]['_count'] += 1
+        data[t]['_sum'] += float(r['SpotPrice'])
+
+    # Calculate efficiency (Hashrate per spot price)
+    for t in data.keys():
+        data[t]['_spot'] = data[t]['_sum']/data[t]['_count']
+        data[t]['_efficiency'] = float(data[t].get('WeightedCapacity', 1)) / data[t]['_spot']
+        del data[t]['_sum']
+        del data[t]['_count']
+
+    # Sort by efficiency
+    attrs = list(data.values())
+    attrs.sort(key=lambda x: (-x["_efficiency"], x['_spot']))
+
+    print(f"Instances sorted: {json.dumps(attrs)}")
+
+    # Remove _* fields
+    for a in attrs:
+        for key in list(a.keys()):
+            if key.startswith("_"):
+                del a[key]
+
+    return attrs
+
 def lambda_handler(event, context):
     print("== EVENT ==")
     print(json.dumps(event))
@@ -117,6 +158,11 @@ def lambda_handler(event, context):
             raise Exception(
                 "None of the requested instance types is available in this region!"
             )
+
+        # Calculate efficiency (Hashrate per spot USD)
+        attrs = sort_by_efficiency(attrs)
+        types_sorted = list(map(lambda x: x["InstanceType"], attrs))
+
     except Exception as e:
         send(event, context, FAILED, reason=f"Error: {e}")
         return False
@@ -127,7 +173,7 @@ def lambda_handler(event, context):
         context,
         SUCCESS,
         {
-            "InstanceTypeNames": ",".join(types_available),
+            "InstanceTypeNames": " ".join(types_sorted),
             "InstanceTypeAttributes": attrs,
         },
     )
