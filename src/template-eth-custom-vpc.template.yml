@@ -10,12 +10,12 @@ Metadata:
           default: Miner Configuration
         Parameters:
         - EthWallet
+        - Hashrate
 
       - Label:
           default: Instance Configuration
         Parameters:
-        - InstanceType
-        - InstanceCount
+        - InstanceTypes
         - PricingPlan
 
       - Label:
@@ -25,46 +25,35 @@ Metadata:
         - SubnetIds
 
 Parameters:
-  InstanceType:
+  InstanceTypes:
+    Description: |
+      Instance types to choose from. Can be "*" to use all available, or wildcards e.g. "g4dn.*,g5.*",
+      or a list of specific instances e.g. "p3.2xlarge,p3.8xlarge". The most cost effective combination
+      of available instances will be used.
     Type: String
-    AllowedValues:
-    ## The commented-out are not worth it - too slow for the price
-    #- g3s.xlarge    # 1 GPU Tesla M60
-    #- g3.8xlarge    # 2 GPU Tesla M60
-    - g4dn.xlarge   # 1 GPU Tesla T4 -- best value (cost/performance)
-    - g4dn.2xlarge  # 1 GPU Tesla T4
-    - g4dn.12xlarge # 4 GPU Tesla T4
-    - g4dn.metal    # 8 GPU Tesla T4
-    - g5.xlarge     # 1 GPU Tesla A10g
-    - g5.12xlarge   # 4 GPU Tesla A10g
-    - g5.48xlarge   # 8 GPU Tesla A10g
-    #- p2.xlarge     # 1 GPU Tesla K80
-    #- p2.8xlarge    # 8 GPU Tesla K80
-    #- p2.16xlarge   # 16 GPU Tesla K80
-    - p3.2xlarge    # 1 GPU Tesla V100
-    - p3.8xlarge    # 4 GPU Tesla V100
-    - p3.16xlarge   # 8 GPU Tesla V100
-    - p3dn.24xlarge # 8 GPU Tesla V100
-    - p4d.24xlarge  # 8 GPU Tesla A100
-    Default: g4dn.xlarge
+    Default: "*"
 
-  InstanceCount:
+  Hashrate:
+    Description: |
+      Required hashrate in MH/s. AWS will start the most cost effective available
+      instances to achieve this Hashrate. Minimum is 25 (1x g4dn.xlarge).
     Type: Number
-    Default: 10
+    Default: 250
+    MinValue: 25
 
   EthWallet:
     Type: String
     Description: Ethereum Wallet Address
     Default: "0x99b36B44cf319c9E0ed4619ee2050B21ECac2c15"
-    AllowedPattern: "0x[0-9a-fA-F]+"
 
   PricingPlan:
     Type: String
-    Description: Spot or On-Demand
+    Description: Spot or On-Demand or Both
     AllowedValues:
     - spot
     - ondemand
-    Default: spot
+    - both
+    Default: both
 
   VpcId:
     Description: The VPC where this stack will be deployed
@@ -73,9 +62,6 @@ Parameters:
   SubnetIds:
     Description: The subnets where the instances will be deployed - at least 3 subnets!
     Type: List<AWS::EC2::Subnet::Id>
-
-Conditions:
-  UseSpot: !Equals [ !Ref PricingPlan, "spot" ]
 
 Mappings:
   # ImageId of "cuda-11 2021-11-19T06-45-18.713Z" in each region
@@ -113,23 +99,109 @@ Mappings:
     us-west-2:
       ImageId: ami-013f60ec8ba5a9ca4
 
-  #SpotPriceMap:
-  #  g4dn.xlarge:
-  #    MaxPrice: 0.17
-  #  g4dn.2xlarge:
-  #    MaxPrice: 0.24
-  #  g4dn.12xlarge:
-  #    MaxPrice: 1.57
-  #  p3.2xlarge:
-  #    MaxPrice: 0.92
-  #  p3.8xlarge:
-  #    MaxPrice: 3.68
-  #  p3.16xlarge:
-  #    MaxPrice: 7.36
-  #  p4d.24xlarge:
-  #    MaxPrice: 10.0
+
+  CapacityAllocation:
+    spot:
+      OnDemandPct: "0"
+    both:
+      OnDemandPct: "50"
+    ondemand:
+      OnDemandPct: "100"
 
 Resources:
+  InstanceFilter:
+    Type: Custom::InstanceFilter
+    Properties:
+      ServiceToken: !GetAtt InstanceFilterLambda.Arn
+      InstanceTypesWanted: !Ref InstanceTypes
+      InstanceTypesAttributes:
+      # WeightedCapacity is the instance type Hashrate in MH/s
+      - InstanceType: g5.xlarge
+        WeightedCapacity: "56"
+      - InstanceType: g5.24xlarge
+        WeightedCapacity: "226"
+      - InstanceType: g5.48xlarge
+        WeightedCapacity: "452"
+      - InstanceType: g4dn.xlarge
+        WeightedCapacity: "25"
+      - InstanceType: g4dn.2xlarge
+        WeightedCapacity: "25"
+      - InstanceType: g4dn.12xlarge
+        WeightedCapacity: "100"
+      - InstanceType: g4dn.metal
+        WeightedCapacity: "204"
+      - InstanceType: p3.2xlarge
+        WeightedCapacity: "93"
+      - InstanceType: p3.8xlarge
+        WeightedCapacity: "372"
+      - InstanceType: p3.16xlarge
+        WeightedCapacity: "744"
+      - InstanceType: p3dn.24xlarge
+        WeightedCapacity: "692"
+      ## p4d.24xlarge doesn't work with ethminer
+      #- InstanceType: p4d.24xlarge
+      #  WeightedCapacity: "999" # It's in fact ~1400 but the max value allowed here is 999
+
+  InstanceFilterLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        # Lambda source is in src/lambdas/instance-filter.py
+        ZipFile: |
+          %%{lambdas/instance-filter.min.py}%%
+      Handler: "index.lambda_handler"
+      Runtime: python3.9
+      Timeout: 10
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  AsgUpdater:
+    DependsOn:
+    - Asg
+    Type: Custom::AsgUpdater
+    Properties:
+      ServiceToken: !GetAtt AsgUpdaterLambda.Arn
+      AsgName: !Ref Asg
+      DesiredCapacity: !Ref Hashrate
+
+  AsgUpdaterLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Code:
+        # Lambda source is in src/lambdas/asg-updater.py
+        ZipFile: |
+          %%{lambdas/asg-updater.min.py}%%
+      Handler: "index.lambda_handler"
+      Runtime: python3.9
+      Timeout: 10
+      Role: !GetAtt LambdaExecutionRole.Arn
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+      - PolicyName: InstanceFilter
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - ec2:DescribeInstanceTypeOfferings
+            - ec2:DescribeInstanceTypes
+            - ec2:DescribeSpotPriceHistory
+            - autoscaling:SetDesiredCapacity
+            Resource: "*"
 
   InstanceRole:
     Type: AWS::IAM::Role
@@ -158,15 +230,6 @@ Resources:
       LaunchTemplateData:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
-        InstanceMarketOptions:
-          Fn::If:
-          - UseSpot
-          - MarketType: spot
-            SpotOptions:
-              SpotInstanceType: one-time
-              #MaxPrice: !FindInMap [ SpotPriceMap, !Ref InstanceType, MaxPrice ]
-          - !Ref AWS::NoValue
-        InstanceType: !Ref InstanceType
         ImageId: !FindInMap [ RegionMap, !Ref "AWS::Region", ImageId ]
         SecurityGroupIds:
         - !Ref SecurityGroup
@@ -190,6 +253,7 @@ Resources:
                     -P stratums://${EthWallet}@eu1.ethermine.org:5555 \
                     -P stratums://${EthWallet}@asia1.ethermine.org:5555 \
                   >> /tmp/ethminer.log 2>&1
+                  sleep 1
                 done
                 __EOF__
                 chmod +x runner.sh
@@ -207,21 +271,32 @@ Resources:
       - Key: Name
         Value: !Ref AWS::StackName
 
-  MinerAsg:
+  Asg:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
-      LaunchTemplate:
-        LaunchTemplateId: !Ref LaunchTemplate
-        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      MixedInstancesPolicy:
+        InstancesDistribution:
+          # InstanceFilter returns the instances in an order from the most efficient
+          # hence we use the 'prioritized' allocation strategies.
+          SpotAllocationStrategy: capacity-optimized-prioritized
+          OnDemandAllocationStrategy: prioritized
+          OnDemandBaseCapacity: "0"
+          OnDemandPercentageAboveBaseCapacity: !FindInMap [ CapacityAllocation, !Ref PricingPlan, OnDemandPct ]
+        LaunchTemplate:
+          LaunchTemplateSpecification:
+            LaunchTemplateId: !Ref LaunchTemplate
+            Version: !GetAtt LaunchTemplate.LatestVersionNumber
+          Overrides: !GetAtt InstanceFilter.InstanceTypeAttributes
       MinSize: 0
-      MaxSize: !Ref InstanceCount
-      DesiredCapacity: !Ref InstanceCount
-      CapacityRebalance: false
+      MaxSize: !Ref Hashrate
+      DesiredCapacity: 0      # This will be updated by AsgUpdater a little later
+      CapacityRebalance: true
       VPCZoneIdentifier: !Ref SubnetIds
       HealthCheckGracePeriod: 900
       HealthCheckType: EC2
       TerminationPolicies:
-      - ClosestToNextInstanceHour
+      - AllocationStrategy
+      - OldestLaunchConfiguration
       NotificationConfigurations:
       - TopicARN: !Ref NotificationTopic
         NotificationTypes:
@@ -233,11 +308,24 @@ Resources:
       - Key: Name
         Value: !Ref AWS::StackName
         PropagateAtLaunch: true
+    CreationPolicy:
+      #AutoScalingCreationPolicy:
+      #  MinSuccessfulInstancesPercent: 0
+      ResourceSignal:
+        Count: 0
+        Timeout: PT1M
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        WaitOnResourceSignals: false
 
   NotificationTopic:
     Type: AWS::SNS::Topic
 
 Outputs:
+  InstanceTypesRequested:
+    Description: List of instance types requested in the ASG (filtered by InstanceTypesWanted and regional availability)
+    Value: !GetAtt InstanceFilter.InstanceTypeNames
+
   NotificationTopic:
     Description: Monitoring notification topic
     Value: !Ref NotificationTopic
