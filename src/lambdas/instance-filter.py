@@ -7,9 +7,9 @@
 # Author: Michael Ludvig -- https://github.com/mludvig/aws-ethereum-miner
 
 import json
-import boto3
 import urllib3
 import datetime
+import boto3
 
 http = urllib3.PoolManager()
 ec2 = boto3.client("ec2")
@@ -84,34 +84,36 @@ def filter_available(types):
 
 
 def sort_by_efficiency(attrs):
-    data = { t['InstanceType']: t for t in attrs }
+    data = {t["InstanceType"]: t for t in attrs}
 
     # Retrieve current spot prices
     result = ec2.describe_spot_price_history(
         InstanceTypes=list(data.keys()),
-        ProductDescriptions=['Linux/UNIX'],
-        StartTime=datetime.datetime.now()-datetime.timedelta(minutes=1)
+        ProductDescriptions=["Linux/UNIX"],
+        StartTime=datetime.datetime.now() - datetime.timedelta(minutes=1),
     )
 
     # Calculate average spot price for each instance
-    for r in result['SpotPriceHistory']:
-        t = r['InstanceType']
-        if '_count' not in data[t]:
-            data[t]['_count'] = 0
-            data[t]['_sum'] = 0.0
-        data[t]['_count'] += 1
-        data[t]['_sum'] += float(r['SpotPrice'])
+    for r in result["SpotPriceHistory"]:
+        t = r["InstanceType"]
+        if "_count" not in data[t]:
+            data[t]["_count"] = 0
+            data[t]["_sum"] = 0.0
+        data[t]["_count"] += 1
+        data[t]["_sum"] += float(r["SpotPrice"])
 
     # Calculate efficiency (Hashrate per spot price)
     for t in data.keys():
-        data[t]['_spot'] = data[t]['_sum']/data[t]['_count']
-        data[t]['_efficiency'] = float(data[t].get('WeightedCapacity', 1)) / data[t]['_spot']
-        del data[t]['_sum']
-        del data[t]['_count']
+        data[t]["_spot"] = data[t]["_sum"] / data[t]["_count"]
+        data[t]["_efficiency"] = (
+            float(data[t].get("WeightedCapacity", 1)) / data[t]["_spot"]
+        )
+        del data[t]["_sum"]
+        del data[t]["_count"]
 
     # Sort by efficiency
     attrs = list(data.values())
-    attrs.sort(key=lambda x: (-x["_efficiency"], x['_spot']))
+    attrs.sort(key=lambda x: (-x["_efficiency"], x["_spot"]))
 
     print(f"Instances sorted: {json.dumps(attrs)}")
 
@@ -122,6 +124,7 @@ def sort_by_efficiency(attrs):
                 del a[key]
 
     return attrs
+
 
 def lambda_handler(event, context):
     print("== EVENT ==")
