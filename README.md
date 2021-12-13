@@ -6,8 +6,7 @@ CloudFormation template for mining Ethereum (ETH) crypto currency on AWS GPU-ena
 
 ## Important!
 
-- Read about the profitability on AWS mining in my article [Mining Bitcoin and other crypto on 
-AWS](https://michael-ludvig.medium.com/mining-bitcoin-and-other-crypto-on-aws-eb172940059f) first!
+- Read about the profitability on AWS mining in my article [Mining Ethereum on AWS - is it worth it?](https://michael-ludvig.medium.com/mining-ethereum-on-aws-is-it-worth-it-f13645c12eec) first!
 
 - [Reach out to me](../../issues) if you need help with any customisation, e.g. to add support for other crypto currencies, etc.
 
@@ -23,11 +22,11 @@ You will have an opportunity to check the stack details, enter the wallet addres
 
 ### What does the template do?
 
-* Spins up an AutoScaling Group with *Spot Instances* of the specified type (by default _g4dn.xlarge_)
+* Spins up an AutoScaling Group with *Spot Instances* of the specified instance types, with the most efficient attempted first (usually *g5.xlarge*, *g4dn.xlarge*, etc ...)
   * Use [template-eth-default-vpc.yml](template-eth-default-vpc.yml) if you want to spin up the instances in the _Default VPC_ (most users).
   * Use [template-eth-custom-vpc.yml](template-eth-custom-vpc.yml) if you have _your own VPC_ that you want to use (advanced users). 
     The Subnets must have direct or NAT access to the internet! Make sure that the VPC matches the Subnets selected!!
-* Runs `ethminer` with the right options upon the instance start
+* Runs `ethminer` with the right options for mining with the ethermine.org pool upon the instance start
 
 ### Increase resource quotas
 
@@ -44,7 +43,7 @@ It pays to request the quotas increase which can be done with this simple comman
 
 ```
 export AWS_REGION=us-west-2 # Oregon
-export CODE=L-3819A6DF      # All G and VT Spot Instance Requests (for g4dn.xlarge, etc)
+export CODE=L-3819A6DF      # All G and VT Spot Instance Requests (for g5.xlarge, g4dn.xlarge, etc)
 # export CODE=L-7212CCBC    # All P Spot Instance Requests (for p3.2xlarge, p3dn.24xlarge or p4d.24xlarge)
 export VCPUS=96             # 96 vCPUs - can accommodate e.g. 24x g4dn.xlarge or 1x p4d.24xlarge
 
@@ -74,10 +73,10 @@ however you have to opt-in to be able to use it. Here is how (you can do this fr
 
 ## Tell me more ...
 
-Check out the instructions in my [Medium article](https://michael-ludvig.medium.com/mining-bitcoin-and-other-crypto-on-aws-eb172940059f),
+Check out the instructions in my [Medium article](https://michael-ludvig.medium.com/mining-ethereum-on-aws-is-it-worth-it-f13645c12eec),
 it contains some important considerations. Alternatively, if you think you know what you are doing follow these instructions:
 
-* Have your Ethereum wallet address ready. You can create a free one for example with [Guarda](https://guarda.io) if needed.
+* Have your Ethereum wallet address ready. Best to use [MetaMask](https://metamask.io) as it will let you manage the Ethermine pool payouts.
 * Login to your [AWS account](https://aws.amazon.com).
 * Click the [Launch link](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-default-vpc.yml) or create the stack manually:
   * Download the [template-eth-custom-vpc.yml](template-eth-custom-vpc.yml) template or [template-eth-default-vpc.yml](template-eth-default-vpc.yml) or clone this Github repository.
