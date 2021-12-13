@@ -25,7 +25,7 @@ You will have an opportunity to check the stack details, enter the wallet addres
 
 * Spins up an AutoScaling Group with *Spot Instances* of the specified type (by default _g4dn.xlarge_)
   * Use [template-eth-default-vpc.yml](template-eth-default-vpc.yml) if you want to spin up the instances in the _Default VPC_ (most users).
-  * Use [template-eth.yml](template-eth.yml) if you have _your own VPC_ that you want to use (advanced users). 
+  * Use [template-eth-custom-vpc.yml](template-eth-custom-vpc.yml) if you have _your own VPC_ that you want to use (advanced users). 
     The Subnets must have direct or NAT access to the internet! Make sure that the VPC matches the Subnets selected!!
 * Runs `ethminer` with the right options upon the instance start
 
@@ -80,7 +80,7 @@ it contains some important considerations. Alternatively, if you think you know 
 * Have your Ethereum wallet address ready. You can create a free one for example with [Guarda](https://guarda.io) if needed.
 * Login to your [AWS account](https://aws.amazon.com).
 * Click the [Launch link](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-default-vpc.yml) or create the stack manually:
-  * Download the [template-eth.yml](template-eth.yml) template or [template-eth-default-vpc.yml](template-eth-default-vpc.yml) or clone this Github repository.
+  * Download the [template-eth-custom-vpc.yml](template-eth-custom-vpc.yml) template or [template-eth-default-vpc.yml](template-eth-default-vpc.yml) or clone this Github repository.
   * In the AWS Console select one of the cheap regions (typically Oregon, N.Virginia, or Ohio)
   * Create a CloudFormation stack from the [template-eth-default-vpc.yml](template-eth-default-vpc.yml)
 * Check your mining progress on [Ethermine dashboard](https://ethermine.org/). 
