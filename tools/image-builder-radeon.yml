@@ -1,0 +1,242 @@
+# Create ImageBuilder pipeline for building Ubuntu 20.04 + AMD Radeon drivers image
+# It's far smaller than the official Radeon AMI and doesn't need a Marketplace subscription
+
+---
+
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+  CPUArch:
+    Description: CPU Architecture
+    Type: String
+    Default: amd64
+    AllowedValues:
+    - amd64
+
+Mappings:
+  ArchSettings:
+    amd64:
+      ParentImage: "ubuntu-server-20-lts-x86/2021.11.19"
+      DebFile: http://repo.radeon.com/amdgpu-install/21.40.2/ubuntu/focal/amdgpu-install_21.40.2.40502-1_all.deb
+      InstanceType: g4ad.xlarge
+
+Resources:
+  InstallRadeonComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: !Sub "${AWS::StackName}-install-radeon"
+      Description: Install AMD Radeon driver
+      Platform: Linux
+      SupportedOsVersions:
+      - Ubuntu 20
+      Version: 1.0.0
+      Data:
+        Fn::Sub:
+        - |
+          name: RadeonInstallationUbuntu20
+          description: AMD Radeon installation on Ubuntu 20.04
+          schemaVersion: 1.0
+          phases:
+            - name: build
+              steps:
+                - name: Install
+                  action: ExecuteBash
+                  inputs:
+                    commands:
+                      - set -x
+                      - set -e
+                      - apt-get update
+                      - wget -nv -O /tmp/amdgpu-install.deb ${DebFile}
+                      - apt-get install -y /tmp/amdgpu-install.deb
+                      - apt-get update
+                      - amdgpu-install --no-32 -y
+                      - apt-get clean
+            - name: validate
+              steps:
+                - name: Validate
+                  action: ExecuteBash
+                  inputs:
+                    commands:
+                      - modprobe amdgpu
+                      - lsmod | grep amdgpu
+            - name: test
+              steps:
+                - name: RadeonTest
+                  action: ExecuteBash
+                  inputs:
+                    commands:
+                      - modprobe amdgpu
+                      - lsmod | grep amdgpu
+        - DebFile: !FindInMap [ ArchSettings, !Ref CPUArch, DebFile ]
+
+  CleanupComponent:
+    Type: AWS::ImageBuilder::Component
+    Properties:
+      Name: !Sub "${AWS::StackName}-cleanup"
+      Description: Cleanup SSM
+      Platform: Linux
+      SupportedOsVersions:
+      - Ubuntu 20
+      Version: 1.0.0
+      Data: |
+        name: CleanupSSM
+        description: Cleanup SSM logs
+        schemaVersion: 1.0
+        phases:
+          - name: build
+            steps:
+              - name: CleanupBuild
+                action: ExecuteBash
+                inputs:
+                  commands:
+                    - rm -rfv /var/log/amazon/ssm/*.log /var/lib/amazon/ssm/i-*/session/orchestration/*
+                    - rm -rfv /var/log/cloud-init* /var/lib/cloud/instances/i-* /var/lib/cloud/instance
+
+  Infrastructure:
+    Type: AWS::ImageBuilder::InfrastructureConfiguration
+    Properties:
+      Name: !Ref AWS::StackName
+      InstanceProfileName: EC2InstanceProfileForImageBuilder
+      InstanceTypes:
+      - !FindInMap [ ArchSettings, !Ref CPUArch, InstanceType ]
+
+  ImageRecipe:
+    Type: AWS::ImageBuilder::ImageRecipe
+    Properties:
+      Name: !Ref AWS::StackName
+      ParentImage:
+        Fn::Sub:
+        - "arn:aws:imagebuilder:${AWS::Region}:aws:image/${ImageName}"
+        - ImageName: !FindInMap [ ArchSettings, !Ref CPUArch, ParentImage ]
+      Components:
+      - ComponentArn: !Ref InstallRadeonComponent
+      - ComponentArn: !Ref CleanupComponent
+      BlockDeviceMappings:
+      - DeviceName: /dev/sda1
+        Ebs:
+          VolumeSize: 10
+          VolumeType: gp3
+      Version: 1.0.1
+      WorkingDirectory: /tmp
+
+  DistributionConfig:
+    Type: AWS::ImageBuilder::DistributionConfiguration
+    Properties:
+      Name: !Ref AWS::StackName
+      Distributions:
+      # All regions where G4DN instances are available
+      - Region: ap-northeast-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-northeast-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-south-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-southeast-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-southeast-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ca-central-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-central-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-north-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-west-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-west-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: eu-west-3
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: sa-east-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: us-east-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: us-east-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: us-west-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: us-west-2
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+
+  ## 'Image' resource immediately starts building the AMI
+  #Image:
+  #  Type: AWS::ImageBuilder::Image
+  #  Properties:
+  #    Name: !Ref AWS::StackName
+  #    InfrastructureConfigurationArn: !Ref Infrastructure
+  #    DistributionConfigurationArn: !Ref DistributionConfig
+  #    EnhancedImageMetadataEnabled: true
+  #    ImageRecipeArn: !Ref ImageRecipe
+
+  ImagePipeline:
+    Type: AWS::ImageBuilder::ImagePipeline
+    Properties:
+      Name: !Ref AWS::StackName
+      InfrastructureConfigurationArn: !Ref Infrastructure
+      DistributionConfigurationArn: !Ref DistributionConfig
+      EnhancedImageMetadataEnabled: true
+      ImageRecipeArn: !Ref ImageRecipe
