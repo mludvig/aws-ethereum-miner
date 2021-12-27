@@ -2,7 +2,7 @@
 
 # Find the regions where the given instance types are available
 
-INSTANCES="p3dn.24xlarge p3.2xlarge g4dn.xlarge g5.xlarge p4d.24xlarge"
+INSTANCES="p3dn.24xlarge p3.2xlarge g4dn.xlarge g5.xlarge p4d.24xlarge g5g.xlarge g4ad.xlarge"
 
 REGIONS=$(aws ec2 describe-regions | jq -r '.Regions[].RegionName' | sort)
 
