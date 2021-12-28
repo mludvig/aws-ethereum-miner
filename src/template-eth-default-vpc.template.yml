@@ -50,56 +50,71 @@ Parameters:
     Default: both
 
 Mappings:
-  # ImageId of "cuda-11 2021-11-19T06-45-18.713Z" in each region
   ImageMap:
     ap-northeast-1:
-      x8664: ami-057223d0b465ef6c8
-      arm64: ami-0d4cb079ff538035a
+      CudaX8664: ami-057223d0b465ef6c8
+      CudaARM64: ami-0d4cb079ff538035a
+      RadeonX8664: ami-0920895676fcb4966
     ap-northeast-2:
-      x8664: ami-04974804b5c32ad3f
-      arm64: ami-03b82416ff1761578
+      CudaX8664: ami-04974804b5c32ad3f
+      CudaARM64: ami-03b82416ff1761578
+      RadeonX8664: ami-0f103c00fa9bafb0e
     ap-south-1:
-      x8664: ami-0138f84dea0009e24
-      arm64: ami-007d5bdb59f189296
+      CudaX8664: ami-0138f84dea0009e24
+      CudaARM64: ami-007d5bdb59f189296
+      RadeonX8664: ami-0eeb53661d79e3b9c
     ap-southeast-1:
-      x8664: ami-028fec8125dca56aa
-      arm64: ami-0ecdf52d29e6a9965
+      CudaX8664: ami-028fec8125dca56aa
+      CudaARM64: ami-0ecdf52d29e6a9965
+      RadeonX8664: ami-00d3ca16eff5adb63
     ap-southeast-2:
-      x8664: ami-07b457617d5ab5026
-      arm64: ami-0b8be1b9abcbfa2a5
+      CudaX8664: ami-07b457617d5ab5026
+      CudaARM64: ami-0b8be1b9abcbfa2a5
+      RadeonX8664: ami-0a04fe46aa8bcaaf7
     ca-central-1:
-      x8664: ami-00cbba349f2627bef
-      arm64: ami-043fb0afe679cdceb
+      CudaX8664: ami-00cbba349f2627bef
+      CudaARM64: ami-043fb0afe679cdceb
+      RadeonX8664: ami-04ad2df5b2bf97fd5
     eu-central-1:
-      x8664: ami-0527e1e1ca0929e8c
-      arm64: ami-084c2c0e33a1d191e
+      CudaX8664: ami-0527e1e1ca0929e8c
+      CudaARM64: ami-084c2c0e33a1d191e
+      RadeonX8664: ami-01f76f27dba711db3
     eu-north-1:
-      x8664: ami-070fab14d346eec81
-      arm64: ami-076ff23b1a1cb45c6
+      CudaX8664: ami-070fab14d346eec81
+      CudaARM64: ami-076ff23b1a1cb45c6
+      RadeonX8664: ami-08dc54829d51009d9
     eu-west-1:
-      x8664: ami-052dfb972e5a6cdd0
-      arm64: ami-09967bb61234a3fc7
+      CudaX8664: ami-052dfb972e5a6cdd0
+      CudaARM64: ami-09967bb61234a3fc7
+      RadeonX8664: ami-05f8a1fbb5cd80c47
     eu-west-2:
-      x8664: ami-0126c804cd6d92090
-      arm64: ami-0cdf91452a2046168
+      CudaX8664: ami-0126c804cd6d92090
+      CudaARM64: ami-0cdf91452a2046168
+      RadeonX8664: ami-0bc7c7f3180e6e855
     eu-west-3:
-      x8664: ami-0fe47281cdcb0102b
-      arm64: ami-0ceee0282ab931a2f
+      CudaX8664: ami-0fe47281cdcb0102b
+      CudaARM64: ami-0ceee0282ab931a2f
+      RadeonX8664: ami-083e41b99285e8504
     sa-east-1:
-      x8664: ami-0ad6f33841de28c4c
-      arm64: ami-0954de81019e3325c
+      CudaX8664: ami-0ad6f33841de28c4c
+      CudaARM64: ami-0954de81019e3325c
+      RadeonX8664: ami-06bf11059e19f03c9
     us-east-1:
-      x8664: ami-04822dc0e04836a86
-      arm64: ami-0356788caa912eb19
+      CudaX8664: ami-04822dc0e04836a86
+      CudaARM64: ami-0356788caa912eb19
+      RadeonX8664: ami-0476917f2861069bf
     us-east-2:
-      x8664: ami-0b3cc42a259739f29
-      arm64: ami-06ccef90a16c90466
+      CudaX8664: ami-0b3cc42a259739f29
+      CudaARM64: ami-06ccef90a16c90466
+      RadeonX8664: ami-0f28b3a6ec09b33d5
     us-west-1:
-      x8664: ami-00158baf36cd6ace7
-      arm64: ami-08d53625a57e71d23
+      CudaX8664: ami-00158baf36cd6ace7
+      CudaARM64: ami-08d53625a57e71d23
+      RadeonX8664: ami-092ae28e6514057a0
     us-west-2:
-      x8664: ami-013f60ec8ba5a9ca4
-      arm64: ami-0fe8b41c830a026d6
+      CudaX8664: ami-013f60ec8ba5a9ca4
+      CudaARM64: ami-0fe8b41c830a026d6
+      RadeonX8664: ami-0356d91a89300f274
 
   CapacityAllocation:
     spot:
@@ -117,11 +132,26 @@ Resources:
       InstanceTypesWanted: !Ref InstanceTypes
       InstanceTypesAttributes:
       # WeightedCapacity is the instance type Hashrate in MH/s
+      - InstanceType: g4ad.xlarge
+        WeightedCapacity: "48"
+        LaunchTemplateSpecification:
+          LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
+          Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+      - InstanceType: g4ad.8xlarge
+        WeightedCapacity: "96"
+        LaunchTemplateSpecification:
+          LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
+          Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+      - InstanceType: g4ad.16xlarge
+        WeightedCapacity: "192"
+        LaunchTemplateSpecification:
+          LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
+          Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
       - InstanceType: g5g.xlarge
         WeightedCapacity: "25"
         LaunchTemplateSpecification:
-          LaunchTemplateId: !Ref LaunchTemplateARM64
-          Version: !GetAtt LaunchTemplateARM64.LatestVersionNumber
+          LaunchTemplateId: !Ref LaunchTemplateCudaARM64
+          Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
       - InstanceType: g5.xlarge
         WeightedCapacity: "56"
       - InstanceType: g5.24xlarge
@@ -231,13 +261,13 @@ Resources:
       Roles:
       - !Ref InstanceRole
 
-  LaunchTemplateX8664:
+  LaunchTemplateCudaX8664:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateData:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
-        ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", x8664 ]
+        ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaX8664 ]
         UserData:
           'Fn::Base64':
             'Fn::Sub': |
@@ -251,7 +281,7 @@ Resources:
                 SERVERS=(us1 us2 eu1 asia1)
                 while (true); do
                   PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
-                  ./ethminer \
+                  ./ethminer -U \
                     -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
                     -P stratums://${EthWallet}@us1.ethermine.org:5555 \
                     -P stratums://${EthWallet}@us2.ethermine.org:5555 \
@@ -264,13 +294,46 @@ Resources:
                 chmod +x runner.sh
                 nohup ./runner.sh &
 
-  LaunchTemplateARM64:
+  LaunchTemplateRadeonX8664:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateData:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
-        ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", arm64 ]
+        ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", RadeonX8664 ]
+        UserData:
+          'Fn::Base64':
+            'Fn::Sub': |
+                #!/bin/bash -x
+                cd /tmp
+                wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-11-opencl-linux-$(uname -m).tar.gz
+                tar xvfz ethminer.tar.gz
+                cd bin
+                cat > runner.sh << __EOF__
+                #!/bin/bash -x
+                SERVERS=(us1 us2 eu1 asia1)
+                while (true); do
+                  PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
+                  ./ethminer -G \
+                    -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@us1.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@us2.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@eu1.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@asia1.ethermine.org:5555 \
+                  >> /tmp/ethminer.log 2>&1
+                  sleep 1
+                done
+                __EOF__
+                chmod +x runner.sh
+                nohup ./runner.sh &
+
+  LaunchTemplateCudaARM64:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Arn: !GetAtt InstanceProfile.Arn
+        ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaARM64 ]
         UserData:
           'Fn::Base64':
             'Fn::Sub': |
@@ -284,7 +347,7 @@ Resources:
                 SERVERS=(us1 us2 eu1 asia1)
                 while (true); do
                   PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
-                  ./ethminer \
+                  ./ethminer -U \
                     -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
                     -P stratums://${EthWallet}@us1.ethermine.org:5555 \
                     -P stratums://${EthWallet}@us2.ethermine.org:5555 \
@@ -310,8 +373,8 @@ Resources:
           OnDemandPercentageAboveBaseCapacity: !FindInMap [ CapacityAllocation, !Ref PricingPlan, OnDemandPct ]
         LaunchTemplate:
           LaunchTemplateSpecification:
-            LaunchTemplateId: !Ref LaunchTemplateX8664
-            Version: !GetAtt LaunchTemplateX8664.LatestVersionNumber
+            LaunchTemplateId: !Ref LaunchTemplateCudaX8664
+            Version: !GetAtt LaunchTemplateCudaX8664.LatestVersionNumber
           Overrides: !GetAtt InstanceFilter.InstanceTypeAttributes
       MinSize: 0
       MaxSize: !Ref Hashrate
