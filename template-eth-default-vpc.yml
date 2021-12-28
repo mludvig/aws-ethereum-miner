@@ -160,12 +160,14 @@ Resources:
         # Lambda source is in src/lambdas/instance-filter.py
         ZipFile: |
           #!/usr/bin/env python3
+          import os
           import json
           import urllib3
           import datetime
           import boto3
           http=urllib3.PoolManager()
           ec2=boto3.client("ec2")
+          VPC_ID=os.getenv("VPC_ID")
           SUCCESS="SUCCESS"
           FAILED="FAILED"
           def send(event,context,status,data={},reason=None):
@@ -204,8 +206,10 @@ Resources:
            return True,types_available
           def sort_by_efficiency(attrs):
            data={t["InstanceType"]:t for t in attrs}
-           result=ec2.describe_spot_price_history(InstanceTypes=list(data.keys()),ProductDescriptions=["Linux/UNIX"],StartTime=datetime.datetime.now()-datetime.timedelta(minutes=1),)
+           result=ec2.describe_spot_price_history(InstanceTypes=list(data.keys()),ProductDescriptions=["Linux/UNIX","Linux/UNIX (Amazon VPC)"],StartTime=datetime.datetime.now()-datetime.timedelta(minutes=1),)
            for r in result["SpotPriceHistory"]:
+            if not VPC_ID and r["ProductDescription"].endswith("(Amazon VPC)"):
+             raise Exception("Your account still supports EC2-Classic. Please deploy \"template-eth-custom-vpc.yml\" instead.")
             t=r["InstanceType"]
             if "_count" not in data[t]:
              data[t]["_count"]=0
@@ -228,6 +232,9 @@ Resources:
           def lambda_handler(event,context):
            print("== EVENT ==")
            print(json.dumps(event))
+           if event["RequestType"]=="Delete":
+            send(event,context,SUCCESS)
+            return
            try:
             try:
              attrs=event["ResourceProperties"]["InstanceTypesAttributes"]

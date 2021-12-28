@@ -173,6 +173,9 @@ Resources:
       Runtime: python3.9
       Timeout: 10
       Role: !GetAtt LambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          VPC_ID: !Ref VpcId
 
   AsgUpdater:
     DependsOn:

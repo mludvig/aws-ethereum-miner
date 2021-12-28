@@ -6,6 +6,7 @@
 
 # Author: Michael Ludvig -- https://github.com/mludvig/aws-ethereum-miner
 
+import os
 import json
 import urllib3
 import datetime
@@ -13,6 +14,12 @@ import boto3
 
 http = urllib3.PoolManager()
 ec2 = boto3.client("ec2")
+
+# Little usability hack:
+# IF $VPC_ID is not specified (= template-eth-default-vpc.yml)
+# AND the account supports EC2-Classic (instance product name ends with "Amazon VPC")
+# THEN we have to advise the user to use "template-eth-custom-vpc.yml" instead.
+VPC_ID = os.getenv("VPC_ID")
 
 SUCCESS = "SUCCESS"
 FAILED = "FAILED"
@@ -89,12 +96,14 @@ def sort_by_efficiency(attrs):
     # Retrieve current spot prices
     result = ec2.describe_spot_price_history(
         InstanceTypes=list(data.keys()),
-        ProductDescriptions=["Linux/UNIX"],
+        ProductDescriptions=["Linux/UNIX","Linux/UNIX (Amazon VPC)"],
         StartTime=datetime.datetime.now() - datetime.timedelta(minutes=1),
     )
 
     # Calculate average spot price for each instance
     for r in result["SpotPriceHistory"]:
+        if not VPC_ID and r["ProductDescription"].endswith("(Amazon VPC)"):
+            raise Exception("Your account still supports EC2-Classic. Please deploy \"template-eth-custom-vpc.yml\" instead.")
         t = r["InstanceType"]
         if "_count" not in data[t]:
             data[t]["_count"] = 0
@@ -129,6 +138,10 @@ def sort_by_efficiency(attrs):
 def lambda_handler(event, context):
     print("== EVENT ==")
     print(json.dumps(event))
+
+    if event["RequestType"] == "Delete":
+        send(event, context, SUCCESS)
+        return
 
     try:
         try:
