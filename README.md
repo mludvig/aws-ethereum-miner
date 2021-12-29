@@ -13,17 +13,35 @@ CloudFormation template for mining Ethereum (ETH) crypto currency on AWS GPU-ena
 ## Quick start
 
 1. Login to your AWS account and have your Ethereum wallet address ready
-2. Launch the stack in one or more of the cheapest regions. Sometimes spot capacity is not available in a particular region, in that case try a different one.
+2. Launch the stack in one or more of the cheapest regions. Sometimes spot
+   capacity is not available in a particular region, in that case try a different
+   one.
 3. Most users should use the _**Default VPC**_ template:
   * Deploy to a Default VPC in **Oregon** _us-west-2_ [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-default-vpc.yml)
   * Deploy to a Default VPC in **Ohio** _us-east-2_ [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-default-vpc.yml)
   * Deploy to a Default VPC in **N. Virginia** _us-east-1_ [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-default-vpc.yml)
-4. If your AWS account is very old and still supports _EC2-Classic_ instance you will have to use the _**Custom VPC**_ template instead and select the VPC and Subnets manually (and yes you can select the default VPC and default subnets). Do not worry - you will be prompted by the _Default VPC_ template if this is the case.
+4. If your AWS account is very old and still supports _EC2-Classic_ instances
+   you will have to use the _**Custom VPC**_ template instead and select the VPC
+   and Subnets manually (and yes you can select the default VPC and default
+   subnets). Do not worry - you will be prompted by the _Default VPC_ template if
+   this is the case.
   * Deploy to a Custom VPC in **Oregon** _us-west-2_ [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-custom-vpc.yml)
   * Deploy to a Custom VPC in **Ohio** _us-east-2_ [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-2#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-custom-vpc.yml)
   * Deploy to a Custom VPC in **N. Virginia** _us-east-1_ [![Launch Stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-custom-vpc.yml)
 
 You will have an opportunity to check the stack details, enter the wallet address, etc, before the stack is launched.
+
+### Which region should I use?
+
+Not all instance types are available in all regions. Use the table below to
+choose the region which supports your desired instance type.
+
+Also note that the Spot and On-Demand prices differ between the regions. The US
+regions are typically slightly cheaper but often have availability issues,
+especially on Spot. The non-US regions are a little more expensive but may have
+the desired instance types available more readily. 
+
+[![Instance regions](tools/instance-regions.png)](tools/instance-regions.png)
 
 ### What does the template do?
 
