@@ -253,7 +253,7 @@ Resources:
            result=ec2.describe_spot_price_history(InstanceTypes=list(data.keys()),ProductDescriptions=["Linux/UNIX","Linux/UNIX (Amazon VPC)"],StartTime=datetime.datetime.now()-datetime.timedelta(minutes=1),)
            for r in result["SpotPriceHistory"]:
             if not VPC_ID and r["ProductDescription"].endswith("(Amazon VPC)"):
-             raise Exception("Your account still supports EC2-Classic. Please deploy \"template-eth-custom-vpc.yml\" instead.")
+             raise Exception('Your account still supports EC2-Classic. Please deploy "template-eth-custom-vpc.yml" instead.')
             t=r["InstanceType"]
             if "_count" not in data[t]:
              data[t]["_count"]=0
