@@ -142,11 +142,15 @@ Resources:
         LaunchTemplateSpecification:
           LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+        _ExcludeInRegions:
+        - ca-central-1
       - InstanceType: g4ad.16xlarge
         WeightedCapacity: "192"
         LaunchTemplateSpecification:
           LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+        _ExcludeInRegions:
+        - ca-central-1
       - InstanceType: g5g.xlarge
         WeightedCapacity: "25"
         LaunchTemplateSpecification:

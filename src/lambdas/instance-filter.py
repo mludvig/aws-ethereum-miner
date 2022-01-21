@@ -149,6 +149,7 @@ def lambda_handler(event, context):
         try:
             attrs = event["ResourceProperties"]["InstanceTypesAttributes"]
             wanted = event["ResourceProperties"]["InstanceTypesWanted"]
+            region = event["ServiceToken"].split(":")[3]
         except KeyError as e:
             raise Exception("Missing required property: {e}")
 
@@ -171,7 +172,23 @@ def lambda_handler(event, context):
             raise Exception(types_available)
 
         # Filter the new 'attrs' list from the filtered types
-        attrs = list(filter(lambda x: x["InstanceType"] in types_available, attrs))
+        print(
+            f"Excluded in {region} region:",
+            json.dumps(
+                [
+                    x["InstanceType"]
+                    for x in attrs
+                    if region in x.get("_ExcludeInRegions", [])
+                ]
+            ),
+        )
+        attrs = list(
+            filter(
+                lambda x: x["InstanceType"] in types_available
+                and region not in x.get("_ExcludeInRegions", []),
+                attrs,
+            )
+        )
         if not attrs:
             raise Exception(
                 "None of the requested instance types is available in this region!"

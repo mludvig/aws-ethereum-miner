@@ -161,11 +161,15 @@ Resources:
         LaunchTemplateSpecification:
           LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+        _ExcludeInRegions:
+        - ca-central-1
       - InstanceType: g4ad.16xlarge
         WeightedCapacity: "192"
         LaunchTemplateSpecification:
           LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+        _ExcludeInRegions:
+        - ca-central-1
       - InstanceType: g5g.xlarge
         WeightedCapacity: "25"
         LaunchTemplateSpecification:
@@ -283,6 +287,7 @@ Resources:
             try:
              attrs=event["ResourceProperties"]["InstanceTypesAttributes"]
              wanted=event["ResourceProperties"]["InstanceTypesWanted"]
+             region=event["ServiceToken"].split(":")[3]
             except KeyError as e:
              raise Exception("Missing required property: {e}")
             try:
@@ -295,7 +300,8 @@ Resources:
             success,types_available=filter_available(types_wanted)
             if not success:
              raise Exception(types_available)
-            attrs=list(filter(lambda x:x["InstanceType"]in types_available,attrs))
+            print(f"Excluded in {region} region:",json.dumps([x["InstanceType"]for x in attrs if region in x.get("_ExcludeInRegions",[])]),)
+            attrs=list(filter(lambda x:x["InstanceType"]in types_available and region not in x.get("_ExcludeInRegions",[]),attrs,))
             if not attrs:
              raise Exception("None of the requested instance types is available in this region!")
             attrs=sort_by_efficiency(attrs)
