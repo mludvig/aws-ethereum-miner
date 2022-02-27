@@ -137,6 +137,16 @@ Resources:
         LaunchTemplateSpecification:
           LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+      - InstanceType: g4ad.2xlarge
+        WeightedCapacity: "48"
+        LaunchTemplateSpecification:
+          LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
+          Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+      - InstanceType: g4ad.4xlarge
+        WeightedCapacity: "48"
+        LaunchTemplateSpecification:
+          LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
+          Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
       - InstanceType: g4ad.8xlarge
         WeightedCapacity: "96"
         LaunchTemplateSpecification:
@@ -387,6 +397,8 @@ Resources:
       AvailabilityZones: !GetAZs ""
       HealthCheckGracePeriod: 900
       HealthCheckType: EC2
+      MetricsCollection:
+      - Granularity: 1Minute
       TerminationPolicies:
       - AllocationStrategy
       - OldestLaunchConfiguration
