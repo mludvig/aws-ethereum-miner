@@ -180,11 +180,11 @@ Resources:
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
         _ExcludeInRegions:
         - ca-central-1
-      - InstanceType: g5g.xlarge
-        WeightedCapacity: "25"
-        LaunchTemplateSpecification:
-          LaunchTemplateId: !Ref LaunchTemplateCudaARM64
-          Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
+      #- InstanceType: g5g.xlarge
+      #  WeightedCapacity: "25"
+      #  LaunchTemplateSpecification:
+      #    LaunchTemplateId: !Ref LaunchTemplateCudaARM64
+      #    Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
       - InstanceType: g5.xlarge
         WeightedCapacity: "56"
       - InstanceType: g5.24xlarge
