@@ -22,8 +22,8 @@ Parameters:
   InstanceTypes:
     Description: |
       Instance types to choose from. Can be "*" to use all available, or wildcards e.g. "g4dn.*,g5.*",
-      or a list of specific instances e.g. "p3.2xlarge,p3.8xlarge". The most cost effective combination
-      of available instances will be used first.
+      or a list of specific instances e.g. "p3.2xlarge,p3.8xlarge", or an exclusion e.g. "-g5g.*".
+      The most cost effective combination of available instances will be used first.
     Type: String
     Default: "*"
 

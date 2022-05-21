@@ -33,8 +33,8 @@ Parameters:
   InstanceTypes:
     Description: |
       Instance types to choose from. Can be "*" to use all available, or wildcards e.g. "g4dn.*,g5.*",
-      or a list of specific instances e.g. "p3.2xlarge,p3.8xlarge". The most cost effective combination
-      of available instances will be used first.
+      or a list of specific instances e.g. "p3.2xlarge,p3.8xlarge", or an exclusion e.g. "-g5g.*".
+      The most cost effective combination of available instances will be used first.
     Type: String
     Default: "*"
 
@@ -267,11 +267,22 @@ Resources:
            if wanted=="*":
             print(f"Instance types wanted: * (=any)")
             return True,types
-           wanted_types=list(map(lambda x:x.strip().rstrip("*").lower(),wanted.split(",")))
-           wanted_types=list(map(lambda x:x if x.find(".")>=0 else f"{x}.",wanted_types))
-           print(f"Instance types wanted: {' '.join(wanted_types)}")
+           wanted_list=list(map(lambda x:x.strip().rstrip("*").lower(),wanted.split(",")))
+           wanted_list=list(map(lambda x:x if x.find(".")>=0 else f"{x}.",wanted_list))
+           unwanted_list=list(filter(lambda x:x.startswith('-'),wanted_list))
+           wanted_list=[wt for wt in wanted_list if wt not in unwanted_list]
+           unwanted_list=[ut[1:]for ut in unwanted_list]
+           print(f"Instance types wanted: {' '.join(wanted_list)} / unwanted: {' '.join(unwanted_list)}")
+           unwanted_types=[]
+           for ut in unwanted_list:
+            unwanted_types.extend(list(filter(lambda x:x.startswith(ut),types)))
+           unwanted_types=set(unwanted_types)
+           types=list(set(types).difference(unwanted_types))
+           if not wanted_list or wanted_list=="*":
+            print(f"Instance types filtered: {' '.join(types)}")
+            return True,types
            filtered_types=[]
-           for wt in wanted_types:
+           for wt in wanted_list:
             filtered_types.extend(list(filter(lambda x:x.startswith(wt),types)))
            filtered_types=list(set(filtered_types)) 
            if not filtered_types:

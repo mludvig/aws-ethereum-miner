@@ -63,14 +63,32 @@ def filter_wanted(types, wanted):
 
     ## Split and normalise the wanted list
     # Remove trailing wildcard and lowercase
-    wanted_types = list(map(lambda x: x.strip().rstrip("*").lower(), wanted.split(",")))
+    wanted_list = list(map(lambda x: x.strip().rstrip("*").lower(), wanted.split(",")))
     # Append "dot" if there's none, e.g. "g4dn" -> "g4dn."
-    wanted_types = list(map(lambda x: x if x.find(".") >= 0 else f"{x}.", wanted_types))
-    print(f"Instance types wanted: {' '.join(wanted_types)}")
+    wanted_list = list(map(lambda x: x if x.find(".") >= 0 else f"{x}.", wanted_list))
+    # Find unwanted types (prepended with "-")
+    unwanted_list = list(filter(lambda x: x.startswith('-'), wanted_list))
+    # Remove unwanted from wanted
+    wanted_list = [ wt for wt in wanted_list if wt not in unwanted_list ]
+    # Strip leading "-" from unwanted_list
+    unwanted_list = [ ut[1:] for ut in unwanted_list ]
+    print(f"Instance types wanted: {' '.join(wanted_list)} / unwanted: {' '.join(unwanted_list)}")
+
+    # Remove unwanted types
+    unwanted_types = []
+    for ut in unwanted_list:
+        unwanted_types.extend(list(filter(lambda x: x.startswith(ut), types)))
+    unwanted_types = set(unwanted_types)
+    types = list(set(types).difference(unwanted_types))
+
+    # If the user only specified unwanted types ...
+    if not wanted_list or wanted_list == "*":
+        print(f"Instance types filtered: {' '.join(types)}")
+        return True, types
 
     ## Filter the types against the wanted list
     filtered_types = []
-    for wt in wanted_types:
+    for wt in wanted_list:
         filtered_types.extend(list(filter(lambda x: x.startswith(wt), types)))
     filtered_types = list(set(filtered_types))  # Remove duplicates
     if not filtered_types:
