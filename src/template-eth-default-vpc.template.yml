@@ -129,9 +129,11 @@ Resources:
         WeightedCapacity: "744"
       - InstanceType: p3dn.24xlarge
         WeightedCapacity: "692"
-      ## p4d.24xlarge doesn't work with ethminer
-      #- InstanceType: p4d.24xlarge
-      #  WeightedCapacity: "999" # It's in fact ~1400 but the max value allowed here is 999
+      - InstanceType: p4d.24xlarge
+        WeightedCapacity: "999" # It's in fact ~1350 but the max value allowed here is 999
+        LaunchTemplateSpecification:
+          LaunchTemplateId: !Ref LaunchTemplateDeepLearning
+          Version: !GetAtt LaunchTemplateDeepLearning.LatestVersionNumber
 
   InstanceFilterLambda:
     Type: AWS::Lambda::Function
@@ -289,6 +291,39 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaARM64 ]
+        UserData:
+          'Fn::Base64':
+            'Fn::Sub': |
+                #!/bin/bash -x
+                cd /tmp
+                wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-11-linux-$(uname -m).tar.gz
+                tar xvfz ethminer.tar.gz
+                cd bin
+                cat > runner.sh << __EOF__
+                #!/bin/bash -x
+                SERVERS=(us1 us2 eu1 asia1)
+                while (true); do
+                  PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
+                  ./ethminer -U \
+                    -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@us1.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@us2.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@eu1.ethermine.org:5555 \
+                    -P stratums://${EthWallet}@asia1.ethermine.org:5555 \
+                  >> /tmp/ethminer.log 2>&1
+                  sleep 1
+                done
+                __EOF__
+                chmod +x runner.sh
+                nohup ./runner.sh &
+
+  LaunchTemplateDeepLearning:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        IamInstanceProfile:
+          Arn: !GetAtt InstanceProfile.Arn
+        ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", DeepLearning ]
         UserData:
           'Fn::Base64':
             'Fn::Sub': |
