@@ -98,6 +98,8 @@ Resources:
         LaunchTemplateSpecification:
           LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
+        _ExcludeInRegions:
+        - eu-central-1
       - InstanceType: g4ad.8xlarge
         WeightedCapacity: "96"
         LaunchTemplateSpecification:
@@ -105,6 +107,7 @@ Resources:
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
         _ExcludeInRegions:
         - ca-central-1
+        - eu-central-1
       - InstanceType: g4ad.16xlarge
         WeightedCapacity: "192"
         LaunchTemplateSpecification:
@@ -112,6 +115,7 @@ Resources:
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
         _ExcludeInRegions:
         - ca-central-1
+        - eu-central-1
       #- InstanceType: g5g.xlarge
       #  WeightedCapacity: "25"
       #  LaunchTemplateSpecification:
@@ -271,6 +275,8 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", RadeonX8664 ]
+        SecurityGroupIds:
+        - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
             'Fn::Sub': |
@@ -304,6 +310,8 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaARM64 ]
+        SecurityGroupIds:
+        - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
             'Fn::Sub': |
