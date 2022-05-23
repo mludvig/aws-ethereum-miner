@@ -2,16 +2,16 @@
 
 # Save the output of this script to ../src/ami-ids.yml
 
-AMI_NAME_DL="Deep Learning AMI (Ubuntu 18.04) Version 60.1"
-AMI_NAME_CUDA_X8664="cuda-11 2021-11-19T09-59-59.478Z"
-AMI_NAME_CUDA_ARM64="cuda-11-4-arm64 2021-12-17T05-03-37.249Z"
+AMI_NAME_DL="Deep Learning AMI (Ubuntu 18.04) Version 60.2"
+AMI_NAME_CUDA_X8664="ubuntu-2204-cuda-117-x8664 2022-05-23T00-37-26.269Z"
+AMI_NAME_CUDA_ARM64="ubuntu-2204-cuda-117-arm64 2022-05-22T22-07-05.800Z"
 AMI_NAME_RADEON="ubuntu-20-radeon-21-40 2021-12-21T04-42-09.455Z"
 
 AMI_OWNERS="amazon 769790836554"
 
 REGIONS=$(aws ec2 describe-regions | jq -r '.Regions[].RegionName' | sort)
 
-cat << __EOF__
+test -t 1 && cat << __EOF__
 # CudaX8664: "${AMI_NAME_CUDA_X8664}"
 # CudaARM64: "${AMI_NAME_CUDA_ARM64}"
 # RadeonX8664: "${AMI_NAME_RADEON}"
@@ -29,3 +29,5 @@ for REGION in ${REGIONS}; do
   echo -n "  RadeonX8664: "; jq -r --arg name "${AMI_NAME_RADEON}" '.Images[]|select(.Name==$name).ImageId' <<< ${AMI_JSON}
   echo -n "  DeepLearning: "; jq -r --arg name "${AMI_NAME_DL}" '.Images[]|select(.Name==$name).ImageId' <<< ${AMI_JSON}
 done
+
+test -t 1 && echo "# Save the above output to ../src/ami-ids.yml"
