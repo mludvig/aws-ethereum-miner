@@ -85,6 +85,7 @@ Resources:
           LaunchTemplateId: !Ref LaunchTemplateRadeonX8664
           Version: !GetAtt LaunchTemplateRadeonX8664.LatestVersionNumber
         _ExcludeInRegions:
+        - ca-central-1
         - eu-central-1
       - InstanceType: g4ad.8xlarge
         WeightedCapacity: "96"
@@ -102,11 +103,16 @@ Resources:
         _ExcludeInRegions:
         - ca-central-1
         - eu-central-1
-      #- InstanceType: g5g.xlarge
-      #  WeightedCapacity: "25"
-      #  LaunchTemplateSpecification:
-      #    LaunchTemplateId: !Ref LaunchTemplateCudaARM64
-      #    Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
+      - InstanceType: g5g.xlarge
+        WeightedCapacity: "25"
+        LaunchTemplateSpecification:
+          LaunchTemplateId: !Ref LaunchTemplateCudaARM64
+          Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
+      - InstanceType: g5g.2xlarge
+        WeightedCapacity: "25"
+        LaunchTemplateSpecification:
+          LaunchTemplateId: !Ref LaunchTemplateCudaARM64
+          Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
       - InstanceType: g5.xlarge
         WeightedCapacity: "56"
       - InstanceType: g5.24xlarge
