@@ -10,7 +10,10 @@ all: ${ALL}
 clean:
 	rm -f ${PY_MINIS} ${ALL}
 
-%.yml: %.template.yml ${PY_MINIS} import-files.py
+template-eth-default-vpc.yml: template-eth-default-vpc.template.yml ${PY_MINIS} import-files.py ami-ids.yml user-data.txt
+	python3 import-files.py --yaml $< > $@
+
+template-eth-custom-vpc.yml: template-eth-custom-vpc.template.yml ${PY_MINIS} import-files.py ami-ids.yml user-data.txt
 	python3 import-files.py --yaml $< > $@
 
 %.min.py: %.py

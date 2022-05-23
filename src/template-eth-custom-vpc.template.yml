@@ -252,29 +252,10 @@ Resources:
         - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
-            'Fn::Sub': |
-                #!/bin/bash -x
-                cd /tmp
-                wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-11-linux-$(uname -m).tar.gz
-                tar xvfz ethminer.tar.gz
-                cd bin
-                cat > runner.sh << __EOF__
-                #!/bin/bash -x
-                SERVERS=(us1 us2 eu1 asia1)
-                while (true); do
-                  PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
-                  ./ethminer -U \
-                    -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@us1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@us2.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@eu1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@asia1.ethermine.org:5555 \
-                  >> /tmp/ethminer.log 2>&1
-                  sleep 1
-                done
-                __EOF__
-                chmod +x runner.sh
-                nohup ./runner.sh &
+            'Fn::Sub':
+              - |
+                %%{user-data.txt}%%
+              - EthminerArgs: "-U"
 
   LaunchTemplateRadeonX8664:
     Type: AWS::EC2::LaunchTemplate
@@ -287,29 +268,10 @@ Resources:
         - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
-            'Fn::Sub': |
-                #!/bin/bash -x
-                cd /tmp
-                wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-11-opencl-linux-$(uname -m).tar.gz
-                tar xvfz ethminer.tar.gz
-                cd bin
-                cat > runner.sh << __EOF__
-                #!/bin/bash -x
-                SERVERS=(us1 us2 eu1 asia1)
-                while (true); do
-                  PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
-                  ./ethminer -G \
-                    -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@us1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@us2.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@eu1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@asia1.ethermine.org:5555 \
-                  >> /tmp/ethminer.log 2>&1
-                  sleep 1
-                done
-                __EOF__
-                chmod +x runner.sh
-                nohup ./runner.sh &
+            'Fn::Sub':
+              - |
+                %%{user-data.txt}%%
+              - EthminerArgs: "-G"
 
   LaunchTemplateCudaARM64:
     Type: AWS::EC2::LaunchTemplate
@@ -322,29 +284,10 @@ Resources:
         - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
-            'Fn::Sub': |
-                #!/bin/bash -x
-                cd /tmp
-                wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-11-linux-$(uname -m).tar.gz
-                tar xvfz ethminer.tar.gz
-                cd bin
-                cat > runner.sh << __EOF__
-                #!/bin/bash -x
-                SERVERS=(us1 us2 eu1 asia1)
-                while (true); do
-                  PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
-                  ./ethminer -U \
-                    -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@us1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@us2.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@eu1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@asia1.ethermine.org:5555 \
-                  >> /tmp/ethminer.log 2>&1
-                  sleep 1
-                done
-                __EOF__
-                chmod +x runner.sh
-                nohup ./runner.sh &
+            'Fn::Sub':
+              - |
+                %%{user-data.txt}%%
+              - EthminerArgs: "-U"
 
   LaunchTemplateDeepLearning:
     Type: AWS::EC2::LaunchTemplate
@@ -357,29 +300,10 @@ Resources:
         - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
-            'Fn::Sub': |
-                #!/bin/bash -x
-                cd /tmp
-                wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-11-linux-$(uname -m).tar.gz
-                tar xvfz ethminer.tar.gz
-                cd bin
-                cat > runner.sh << __EOF__
-                #!/bin/bash -x
-                SERVERS=(us1 us2 eu1 asia1)
-                while (true); do
-                  PREFERRED_SERVER=\${!SERVERS[\${!RANDOM} % \${!#SERVERS[@]}]}
-                  ./ethminer -U \
-                    -P stratums://${EthWallet}@\${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@us1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@us2.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@eu1.ethermine.org:5555 \
-                    -P stratums://${EthWallet}@asia1.ethermine.org:5555 \
-                  >> /tmp/ethminer.log 2>&1
-                  sleep 1
-                done
-                __EOF__
-                chmod +x runner.sh
-                nohup ./runner.sh &
+            'Fn::Sub':
+              - |
+                %%{user-data.txt}%%
+              - EthminerArgs: "-U"
 
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
