@@ -255,7 +255,8 @@ Resources:
             'Fn::Sub':
               - |
                 %%{user-data.txt}%%
-              - EthminerArgs: "-U"
+              - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-x86_64.tar.gz
+                EthminerArgs: "-U"
 
   LaunchTemplateRadeonX8664:
     Type: AWS::EC2::LaunchTemplate
@@ -271,7 +272,8 @@ Resources:
             'Fn::Sub':
               - |
                 %%{user-data.txt}%%
-              - EthminerArgs: "-G"
+              - EthminerTarGz: ethminer-0.19.0-cuda-11-opencl-linux-x86_64.tar.gz
+                EthminerArgs: "-G"
 
   LaunchTemplateCudaARM64:
     Type: AWS::EC2::LaunchTemplate
@@ -287,7 +289,8 @@ Resources:
             'Fn::Sub':
               - |
                 %%{user-data.txt}%%
-              - EthminerArgs: "-U"
+              - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-aarch64.tar.gz
+                EthminerArgs: "-U"
 
   LaunchTemplateDeepLearning:
     Type: AWS::EC2::LaunchTemplate
@@ -303,7 +306,8 @@ Resources:
             'Fn::Sub':
               - |
                 %%{user-data.txt}%%
-              - EthminerArgs: "-U"
+              - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-x86_64.tar.gz
+                EthminerArgs: "-U"
 
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup

@@ -2,7 +2,7 @@
 cd /tmp
 AZID=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone-id | cut -d- -f1)
 INSTTYPE=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-wget -O ethminer.tar.gz "https://ethminer-cuda.s3.amazonaws.com/0.19.0/ethminer-0.19.0-cuda-11-linux-$(uname -m).tar.gz?az=${!AZID}&type=${!INSTTYPE}"
+wget -O ethminer.tar.gz "https://ethminer-cuda.s3.amazonaws.com/0.19.0/${EthminerTarGz}?az=${!AZID}&type=${!INSTTYPE}"
 tar xvfz ethminer.tar.gz
 cd bin
 case ${!AZID:0:1} in
