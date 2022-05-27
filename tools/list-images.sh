@@ -3,8 +3,8 @@
 # Save the output of this script to ../src/ami-ids.yml
 
 AMI_NAME_DL="Deep Learning AMI (Ubuntu 18.04) Version 60.2"
-AMI_NAME_CUDA_X8664="ubuntu-2204-cuda-117-x8664 2022-05-23T00-37-26.269Z"
-AMI_NAME_CUDA_ARM64="ubuntu-2204-cuda-117-arm64 2022-05-22T22-07-05.800Z"
+AMI_NAME_CUDA_X8664="ubuntu-22-04-nvidia-510-73-08-x8664 2022-05-26T06-25-07.884Z"
+AMI_NAME_CUDA_ARM64="ubuntu-22-04-nvidia-510-73-08-aarch64 2022-05-26T06-25-02.812Z"
 AMI_NAME_RADEON="ubuntu-20-radeon-21-40 2021-12-21T04-42-09.455Z"
 
 AMI_OWNERS="amazon 769790836554"

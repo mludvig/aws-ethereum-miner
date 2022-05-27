@@ -1,5 +1,5 @@
-# Create ImageBuilder pipeline for building Ubuntu 20.04 + CUDA 11 image
-# It's far smaller than the DeepLearning AMI (15GB vs 100GB+) and supports the new G5 instances
+# Create ImageBuilder pipeline for building Ubuntu 22.04 + NVIDIA Driver
+# It's far smaller than the DeepLearning AMI (10GB vs 150GB+) and supports the new G5 instances
 
 ---
 
@@ -17,31 +17,27 @@ Parameters:
 Mappings:
   ArchSettings:
     x86-64:
-      ParentImage: "ubuntu-server-20-lts-x86/2021.11.19"
-      NvidiaArch: x86_64
-      DebFile: cuda-repo-ubuntu2004-11-4-local_11.4.3-470.82.01-1_amd64.deb
+      ParentImage: ami-09d56f8956ab235b3  # Ubuntu Server 22.04 LTS (HVM) [us-east-1 / x86-64]
+      NvidiaDriver: https://us.download.nvidia.com/tesla/510.73.08/NVIDIA-Linux-x86_64-510.73.08.run
       InstanceType: g5.xlarge
     arm64:
-      ParentImage: "ubuntu-server-20-lts-arm64/2021.11.30"
-      NvidiaArch: sbsa  # Server Base System Architecture
-      DebFile: cuda-repo-ubuntu2004-11-4-local_11.4.3-470.82.01-1_arm64.deb
+      ParentImage: ami-02ddaf75821f25213  # Ubuntu Server 22.04 LTS (HVM) [us-east-1 / arm64]
+      NvidiaDriver: https://us.download.nvidia.com/tesla/510.73.08/NVIDIA-Linux-aarch64-510.73.08.run
       InstanceType: g5g.xlarge
 
 Resources:
   InstallCudaComponent:
     Type: AWS::ImageBuilder::Component
     Properties:
-      Name: !Sub "${AWS::StackName}-install-cuda-11"
-      Description: Install CUDA 11
+      Name: !Sub "${AWS::StackName}-install-nvidia"
+      Description: Install NVIDIA Driver
       Platform: Linux
-      SupportedOsVersions:
-      - Ubuntu 20
       Version: 1.0.0
       Data:
         Fn::Sub:
         - |
-          name: CudaInstallationUbuntu20
-          description: NVidia CUDA 11 installation on Ubuntu 20.04
+          name: NvidiaInstallationUbuntu
+          description: NVidia driver installation on Ubuntu
           schemaVersion: 1.0
           phases:
             - name: build
@@ -52,19 +48,11 @@ Resources:
                     commands:
                       - set -x
                       - set -e
-                      - VAR_DIR=/var/$(basename ${DebFile} | cut -d_ -f1)
-                      - CUDA_VER=$(basename ${DebFile} | cut -d_ -f2 | cut -d- -f1)
-                      - mkdir -p ${!VAR_DIR}
-                      - mount -t tmpfs -o size=6G tmpfs ${!VAR_DIR}
-                      - cd ${!VAR_DIR}
-                      - wget -nv https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/${NvidiaArch}/cuda-ubuntu2004.pin
-                      - mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-                      - wget -nv https://developer.download.nvidia.com/compute/cuda/${!CUDA_VER}/local_installers/${DebFile}
-                      - dpkg -i ${DebFile}
-                      - rm -f ${DebFile}
-                      - apt-key add ${!VAR_DIR}/7fa2af80.pub
                       - apt-get update
-                      - apt-get -y install cuda
+                      - apt-get -y install build-essential dkms pkg-config
+                      - wget -nv ${NvidiaDriver}
+                      - sh $(basename ${NvidiaDriver}) -s
+                      - dkms add nvidia/$(cut -d/ -f5 <<< ${NvidiaDriver})
                       - apt-get clean
             - name: validate
               steps:
@@ -80,10 +68,10 @@ Resources:
                   action: ExecuteBash
                   inputs:
                     commands:
+                      - lsmod | grep ^nvidia
                       - which nvidia-smi
                       - nvidia-smi
-        - NvidiaArch: !FindInMap [ ArchSettings, !Ref CPUArch, NvidiaArch ]
-          DebFile: !FindInMap [ ArchSettings, !Ref CPUArch, DebFile ]
+        - NvidiaDriver: !FindInMap [ ArchSettings, !Ref CPUArch, NvidiaDriver ]
 
   CleanupComponent:
     Type: AWS::ImageBuilder::Component
@@ -91,8 +79,6 @@ Resources:
       Name: !Sub "${AWS::StackName}-cleanup"
       Description: Cleanup SSM
       Platform: Linux
-      SupportedOsVersions:
-      - Ubuntu 20
       Version: 1.0.0
       Data: |
         name: CleanupSSM
@@ -120,10 +106,7 @@ Resources:
     Type: AWS::ImageBuilder::ImageRecipe
     Properties:
       Name: !Ref AWS::StackName
-      ParentImage:
-        Fn::Sub:
-        - "arn:aws:imagebuilder:${AWS::Region}:aws:image/${ImageName}"
-        - ImageName: !FindInMap [ ArchSettings, !Ref CPUArch, ParentImage ]
+      ParentImage: !FindInMap [ ArchSettings, !Ref CPUArch, ParentImage ]
       Components:
       #- ComponentArn: !Sub "arn:aws:imagebuilder:${AWS::Region}:aws:component/update-linux/1.0.2/1"
       - ComponentArn: !Ref InstallCudaComponent
@@ -132,7 +115,7 @@ Resources:
       BlockDeviceMappings:
       - DeviceName: /dev/sda1
         Ebs:
-          VolumeSize: 15
+          VolumeSize: 10
           VolumeType: gp3
       Version: 1.0.1
       WorkingDirectory: /tmp
@@ -264,3 +247,8 @@ Resources:
       DistributionConfigurationArn: !Ref DistributionConfig
       EnhancedImageMetadataEnabled: true
       ImageRecipeArn: !Ref ImageRecipe
+
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/imagebuilder/${AWS::StackName}"
