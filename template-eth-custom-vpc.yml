@@ -70,6 +70,16 @@ Parameters:
 
 Mappings:
   ImageMap:
+    af-south-1:
+      CudaX8664: ami-086e4f2466c6a6a12
+      CudaARM64: ami-096626b5ba66b5e23
+      RadeonX8664: ami-0b72cda9a0157a2d1
+      DeepLearning: ami-0b863201ae2d10811
+    ap-east-1:
+      CudaX8664: ami-00165c52f16e24d9e
+      CudaARM64: ami-022a4f059919ef75b
+      RadeonX8664: ami-03d1bf3d3c33f6d20
+      DeepLearning: ami-01026c742061d0555
     ap-northeast-1:
       CudaX8664: ami-0c28d4506b37946bf
       CudaARM64: ami-03f9c9c4f6975077f
@@ -115,6 +125,11 @@ Mappings:
       CudaARM64: ami-0287ac691e5cdf7b9
       RadeonX8664: ami-08dc54829d51009d9
       DeepLearning: ami-072b118476d963637
+    eu-south-1:
+      CudaX8664: ami-0d3c2d911cb96a40e
+      CudaARM64: ami-0203f39d472bf208c
+      RadeonX8664: ami-0509b68defac9d009
+      DeepLearning: ami-0a3f7de498488c104
     eu-west-1:
       CudaX8664: ami-0ac19908222580bb6
       CudaARM64: ami-091ac19415b2331fe
@@ -130,6 +145,11 @@ Mappings:
       CudaARM64: ami-0d94c2e2304703d49
       RadeonX8664: ami-083e41b99285e8504
       DeepLearning: ami-05ec8353ae3e77e65
+    me-south-1:
+      CudaX8664: ami-07c5b9ea8cf60134c
+      CudaARM64: ami-07386ff7a626d5f0b
+      RadeonX8664: ami-0927bb0fe8811cefd
+      DeepLearning: ami-09367856c60c94fc9
     sa-east-1:
       CudaX8664: ami-01877b4bff76f8d26
       CudaARM64: ami-05b762e74fa40d52e

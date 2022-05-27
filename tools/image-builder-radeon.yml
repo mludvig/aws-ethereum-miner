@@ -125,6 +125,18 @@ Resources:
       Name: !Ref AWS::StackName
       Distributions:
       # All regions where G4DN instances are available
+      - Region: af-south-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: ap-east-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
       - Region: ap-northeast-1
         AmiDistributionConfiguration:
           Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
@@ -173,6 +185,12 @@ Resources:
           LaunchPermissionConfiguration:
             UserGroups:
               - all
+      - Region: eu-south-1
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
       - Region: eu-west-1
         AmiDistributionConfiguration:
           Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
@@ -186,6 +204,12 @@ Resources:
             UserGroups:
               - all
       - Region: eu-west-3
+        AmiDistributionConfiguration:
+          Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
+          LaunchPermissionConfiguration:
+            UserGroups:
+              - all
+      - Region: me-south-1
         AmiDistributionConfiguration:
           Name: !Sub "${AWS::StackName} {{imagebuilder:buildDate}}"
           LaunchPermissionConfiguration:
