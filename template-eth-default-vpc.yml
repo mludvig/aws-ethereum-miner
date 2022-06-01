@@ -35,10 +35,10 @@ Parameters:
   Hashrate:
     Description: |
       Required hashrate in MH/s. AWS will start the most cost effective available
-      instances to achieve this Hashrate. Minimum is 25 (1x g4dn.xlarge).
+      instances to achieve this Hashrate.
     Type: Number
-    Default: 250
-    MinValue: 25
+    Default: 1000
+    MinValue: 0
 
   EthWallet:
     Type: String
