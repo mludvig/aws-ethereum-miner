@@ -1,6 +1,6 @@
-# AWS Ethereum miner
+# AWS Ethereum (ETH) and Ethereum Classic (ETC) miner
 
-CloudFormation template for mining Ethereum (ETH) crypto currency on AWS GPU-enabled EC2 instances
+CloudFormation template for mining **Ethereum (ETH)** and **Ethereum Classic (ETC)** crypto currency on AWS GPU-enabled EC2 instances
 
 <img align="right" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ethereum_logo_2014.svg/128px-Ethereum_logo_2014.svg.png"/>
 
@@ -12,7 +12,9 @@ CloudFormation template for mining Ethereum (ETH) crypto currency on AWS GPU-ena
 
 ## Quick start
 
-1. Login to your AWS account and have your Ethereum wallet address ready
+1. Login to your AWS account and have your ETH or ETC wallet address ready. Note
+   that they may be the same or different, depending on the wallet or exchange that
+   you use.
 2. Launch the stack in one or more of the cheapest regions. Sometimes spot
    capacity is not available in a particular region, in that case try a different
    one.
@@ -124,7 +126,7 @@ however you have to opt-in to be able to use it. Here is how (you can do this fr
 Check out the instructions in my [Medium article](https://michael-ludvig.medium.com/mining-ethereum-on-aws-is-it-worth-it-f13645c12eec),
 it contains some important considerations. Alternatively, if you think you know what you are doing follow these instructions:
 
-* Have your Ethereum wallet address ready. Best to use [MetaMask](https://metamask.io) as it will let you manage the Ethermine pool payouts.
+* Have your *ETH* or *ETC* wallet address ready. Best to use [MetaMask](https://metamask.io) as it will let you manage the Ethermine pool payouts.
 * Login to your [AWS account](https://aws.amazon.com).
 * Click the [Launch link](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=ethminer&templateURL=https://s3.us-west-2.amazonaws.com/cnl4uehyq6/ethminer/template-eth-default-vpc.yml) or create the stack manually:
   * Download the [template-eth-custom-vpc.yml](template-eth-custom-vpc.yml) template or [template-eth-default-vpc.yml](template-eth-default-vpc.yml) or clone this Github repository.
