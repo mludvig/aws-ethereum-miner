@@ -9,7 +9,8 @@ Metadata:
       - Label:
           default: Miner Configuration
         Parameters:
-        - EthWallet
+        - EthEtc
+        - WalletAddress
         - Hashrate
 
       - Label:
@@ -35,9 +36,17 @@ Parameters:
     Default: 1000
     MinValue: 0
 
-  EthWallet:
+  EthEtc:
     Type: String
-    Description: Ethereum Wallet Address
+    Description: Coin type - ETH (Ethereum) or ETC (Ethereum Classic)
+    AllowedValues:
+    - ETH
+    - ETC
+    Default: ETH
+
+  WalletAddress:
+    Type: String
+    Description: Ethereum or Ethereum Classic Wallet Address
     Default: "0x99b36B44cf319c9E0ed4619ee2050B21ECac2c15"
 
   PricingPlan:
@@ -48,6 +57,9 @@ Parameters:
     - ondemand
     - both
     Default: both
+
+Conditions:
+  EthereumClassic: !Equals [ !Ref EthEtc, "ETC" ]
 
 Mappings:
   ImageMap:
@@ -232,12 +244,20 @@ Resources:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaX8664 ]
         UserData:
-          'Fn::Base64':
-            'Fn::Sub':
-              - |
-                %%{user-data.txt}%%
-              - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-x86_64.tar.gz
-                EthminerArgs: "-U"
+          Fn::If:
+          - EthereumClassic
+          - 'Fn::Base64':
+              'Fn::Sub':
+                - |
+                  %%{user-data-etc.txt}%%
+                - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-x86_64.tar.gz
+                  EtcminerArgs: "-U"
+          - 'Fn::Base64':
+              'Fn::Sub':
+                - |
+                  %%{user-data-eth.txt}%%
+                - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-x86_64.tar.gz
+                  EthminerArgs: "-U"
 
   LaunchTemplateRadeonX8664:
     Type: AWS::EC2::LaunchTemplate
@@ -247,12 +267,20 @@ Resources:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", RadeonX8664 ]
         UserData:
-          'Fn::Base64':
-            'Fn::Sub':
-              - |
-                %%{user-data.txt}%%
-              - EthminerTarGz: ethminer-0.19.0-cuda-11-opencl-linux-x86_64.tar.gz
-                EthminerArgs: "-G"
+          Fn::If:
+          - EthereumClassic
+          - 'Fn::Base64':
+              'Fn::Sub':
+                - |
+                  %%{user-data-etc.txt}%%
+                - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-x86_64.tar.gz
+                  EtcminerArgs: "-G"
+          - 'Fn::Base64':
+              'Fn::Sub':
+                - |
+                  %%{user-data-eth.txt}%%
+                - EthminerTarGz: ethminer-0.19.0-cuda-11-opencl-linux-x86_64.tar.gz
+                  EthminerArgs: "-G"
 
   LaunchTemplateCudaARM64:
     Type: AWS::EC2::LaunchTemplate
@@ -262,12 +290,20 @@ Resources:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaARM64 ]
         UserData:
-          'Fn::Base64':
-            'Fn::Sub':
-              - |
-                %%{user-data.txt}%%
-              - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-aarch64.tar.gz
-                EthminerArgs: "-U"
+          Fn::If:
+          - EthereumClassic
+          - 'Fn::Base64':
+              'Fn::Sub':
+                - |
+                  %%{user-data-etc.txt}%%
+                - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-aarch64.tar.gz
+                  EtcminerArgs: "-U"
+          - 'Fn::Base64':
+              'Fn::Sub':
+                - |
+                  %%{user-data-eth.txt}%%
+                - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-aarch64.tar.gz
+                  EthminerArgs: "-U"
 
   LaunchTemplateDeepLearning:
     Type: AWS::EC2::LaunchTemplate
@@ -277,12 +313,20 @@ Resources:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", DeepLearning ]
         UserData:
-          'Fn::Base64':
-            'Fn::Sub':
-              - |
-                %%{user-data.txt}%%
-              - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-x86_64.tar.gz
-                EthminerArgs: "-U"
+          Fn::If:
+          - EthereumClassic
+          - 'Fn::Base64':
+              'Fn::Sub':
+                - |
+                  %%{user-data-etc.txt}%%
+                - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-aarch64.tar.gz
+                  EtcminerArgs: "-U"
+          - 'Fn::Base64':
+              'Fn::Sub':
+                - |
+                  %%{user-data-eth.txt}%%
+                - EthminerTarGz: ethminer-0.19.0-cuda-11-linux-aarch64.tar.gz
+                  EthminerArgs: "-U"
 
   Asg:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -347,4 +391,8 @@ Outputs:
 
   DashboardUrl:
     Description: Ethermine Dashboard URL
-    Value: !Sub "https://ethermine.org/miners/${EthWallet}/dashboard"
+    Value:
+      Fn::If:
+      - EthereumClassic
+      - !Sub "https://etc.ethermine.org/miners/${WalletAddress}/dashboard"
+      - !Sub "https://ethermine.org/miners/${WalletAddress}/dashboard"

@@ -1,0 +1,38 @@
+#!/bin/bash -x
+cd /tmp
+AZID=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone-id | cut -d- -f1)
+INSTTYPE=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
+wget -O ethminer.tar.gz https://ethminer-cuda.s3.amazonaws.com/0.19.0/${EthminerTarGz}
+tar xvfz ethminer.tar.gz
+cd bin
+case ${!AZID:0:1} in
+  u) PREFERRED_SERVER="us1";;
+  e) PREFERRED_SERVER="eu1";;
+  a) PREFERRED_SERVER="asia1";;
+  *) PREFERRED_SERVER="us2";;
+esac
+cat > runner.sh << __EOF__
+#!/bin/bash -x
+while (true); do
+  ./ethminer ${EthminerArgs} --exit \
+    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.ethermine.org:5555 \
+    -P stratums://${WalletAddress}.${AWS::Region}@us1.ethermine.org:5555 \
+    -P stratums://${WalletAddress}.${AWS::Region}@us2.ethermine.org:5555 \
+    -P stratums://${WalletAddress}.${AWS::Region}@eu1.ethermine.org:5555 \
+    -P stratums://${WalletAddress}.${AWS::Region}@asia1.ethermine.org:5555 \
+  >> /tmp/ethminer.log 2>&1
+  sleep 1
+done
+__EOF__
+chmod +x runner.sh
+nohup ./runner.sh &
+# Shut down after "The Merge"
+TS_NOW=$(date +%s)
+TS_MERGE=$(date +%s --date "2022-09-15 00:00:00")
+if expr ${!TS_NOW} \< ${!TS_MERGE}; then
+  # Shutdown at around the estimated merge time
+  shutdown -P +$(( (${!TS_MERGE} - ${!TS_NOW}) / 60 - (${!RANDOM} % 180) ))
+else
+  # Roll over every now and then to refresh
+  shutdown -P +$(( 1440 + (${!RANDOM} % 1440) ))
+fi
