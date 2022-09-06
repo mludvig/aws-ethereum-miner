@@ -2,7 +2,7 @@
 
 CloudFormation template for mining **Ethereum (ETH)** and **Ethereum Classic (ETC)** crypto currency on AWS GPU-enabled EC2 instances
 
-<img align="right" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Ethereum_logo_2014.svg/128px-Ethereum_logo_2014.svg.png"/>
+<img width="256px" align="right" src="https://upload.wikimedia.org/wikipedia/commons/4/42/Ethereum_Classic_ETC_Logo.png"/>
 
 ## Important!
 
