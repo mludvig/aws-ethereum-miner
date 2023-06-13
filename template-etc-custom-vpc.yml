@@ -525,19 +525,19 @@ Resources:
                 tar xvfz etcminer.tar.gz
                 cd etcminer
                 case ${!AZID:0:1} in
-                  u) PREFERRED_SERVER="us1-etc";;
-                  e) PREFERRED_SERVER="eu1-etc";;
-                  a) PREFERRED_SERVER="asia1-etc";;
-                  *) PREFERRED_SERVER="us1-etc";;
+                  e) PREFERRED_SERVER="etc";;
+                  u) PREFERRED_SERVER="us-etc";;
+                  a) PREFERRED_SERVER="asia-etc";;
+                  *) PREFERRED_SERVER="etc";;
                 esac
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
                 while (true); do
                   ./etcminer ${EtcminerArgs} --exit \
-                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@us1-etc.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@eu1-etc.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@asia1-etc.ethermine.org:5555 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@etc.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@eu-etc.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@asia-etc.2miners.com:11010 \
                   >> /tmp/etcminer.log 2>&1
                   sleep 1
                 done
@@ -568,19 +568,19 @@ Resources:
                 tar xvfz etcminer.tar.gz
                 cd etcminer
                 case ${!AZID:0:1} in
-                  u) PREFERRED_SERVER="us1-etc";;
-                  e) PREFERRED_SERVER="eu1-etc";;
-                  a) PREFERRED_SERVER="asia1-etc";;
-                  *) PREFERRED_SERVER="us1-etc";;
+                  e) PREFERRED_SERVER="etc";;
+                  u) PREFERRED_SERVER="us-etc";;
+                  a) PREFERRED_SERVER="asia-etc";;
+                  *) PREFERRED_SERVER="etc";;
                 esac
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
                 while (true); do
                   ./etcminer ${EtcminerArgs} --exit \
-                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@us1-etc.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@eu1-etc.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@asia1-etc.ethermine.org:5555 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@etc.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@eu-etc.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@asia-etc.2miners.com:11010 \
                   >> /tmp/etcminer.log 2>&1
                   sleep 1
                 done
@@ -611,19 +611,19 @@ Resources:
                 tar xvfz etcminer.tar.gz
                 cd etcminer
                 case ${!AZID:0:1} in
-                  u) PREFERRED_SERVER="us1-etc";;
-                  e) PREFERRED_SERVER="eu1-etc";;
-                  a) PREFERRED_SERVER="asia1-etc";;
-                  *) PREFERRED_SERVER="us1-etc";;
+                  e) PREFERRED_SERVER="etc";;
+                  u) PREFERRED_SERVER="us-etc";;
+                  a) PREFERRED_SERVER="asia-etc";;
+                  *) PREFERRED_SERVER="etc";;
                 esac
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
                 while (true); do
                   ./etcminer ${EtcminerArgs} --exit \
-                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@us1-etc.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@eu1-etc.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@asia1-etc.ethermine.org:5555 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@etc.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@eu-etc.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@asia-etc.2miners.com:11010 \
                   >> /tmp/etcminer.log 2>&1
                   sleep 1
                 done
@@ -654,19 +654,19 @@ Resources:
                 tar xvfz etcminer.tar.gz
                 cd etcminer
                 case ${!AZID:0:1} in
-                  u) PREFERRED_SERVER="us1-etc";;
-                  e) PREFERRED_SERVER="eu1-etc";;
-                  a) PREFERRED_SERVER="asia1-etc";;
-                  *) PREFERRED_SERVER="us1-etc";;
+                  e) PREFERRED_SERVER="etc";;
+                  u) PREFERRED_SERVER="us-etc";;
+                  a) PREFERRED_SERVER="asia-etc";;
+                  *) PREFERRED_SERVER="etc";;
                 esac
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
                 while (true); do
                   ./etcminer ${EtcminerArgs} --exit \
-                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@us1-etc.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@eu1-etc.ethermine.org:5555 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@asia1-etc.ethermine.org:5555 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@etc.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@eu-etc.2miners.com:11010 \
+                    -P stratums://${WalletAddress}.${AWS::Region}@asia-etc.2miners.com:11010 \
                   >> /tmp/etcminer.log 2>&1
                   sleep 1
                 done
@@ -751,4 +751,4 @@ Outputs:
 
   DashboardUrl:
     Description: Ethermine Dashboard URL
-    Value: !Sub "https://etc.ethermine.org/miners/${WalletAddress}/dashboard"
+    Value: !Sub "https://etc.2miners.com/account/${WalletAddress}"
