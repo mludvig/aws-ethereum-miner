@@ -236,16 +236,16 @@ Resources:
         _ExcludeInRegions:
         - ca-central-1
         - eu-central-1
-      - InstanceType: g5g.xlarge
-        WeightedCapacity: "25"
-        LaunchTemplateSpecification:
-          LaunchTemplateId: !Ref LaunchTemplateCudaARM64
-          Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
-      - InstanceType: g5g.2xlarge
-        WeightedCapacity: "25"
-        LaunchTemplateSpecification:
-          LaunchTemplateId: !Ref LaunchTemplateCudaARM64
-          Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
+      #- InstanceType: g5g.xlarge
+      #  WeightedCapacity: "25"
+      #  LaunchTemplateSpecification:
+      #    LaunchTemplateId: !Ref LaunchTemplateCudaARM64
+      #    Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
+      #- InstanceType: g5g.2xlarge
+      #  WeightedCapacity: "25"
+      #  LaunchTemplateSpecification:
+      #    LaunchTemplateId: !Ref LaunchTemplateCudaARM64
+      #    Version: !GetAtt LaunchTemplateCudaARM64.LatestVersionNumber
       - InstanceType: g5.xlarge
         WeightedCapacity: "56"
       - InstanceType: g5.24xlarge
@@ -580,38 +580,20 @@ Resources:
               - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-x86_64.tar.gz
                 EtcminerArgs: "-G"
 
-  LaunchTemplateCudaARM64:
-    Type: AWS::EC2::LaunchTemplate
-    Properties:
-      LaunchTemplateData:
-        IamInstanceProfile:
-          Arn: !GetAtt InstanceProfile.Arn
-        ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaARM64 ]
-        SecurityGroupIds:
-        - !Ref SecurityGroup
-        UserData:
-          'Fn::Base64':
-            'Fn::Sub':
-              - |
-                #!/bin/bash -x
-                shutdown -P +$((14400 + $RANDOM % 7200))  # Refresh the fleet every 10-15 days
-                cd /tmp
-                wget -O /tmp/runner https://s3.us-west-2.amazonaws.com/cnl4uehyq6/pyrite/runner/runner-x86_64-v1
-                chmod +x /tmp/runner
-                cat > runner.sh << __EOF__
-                #!/bin/bash -x
-                for X in \$(seq 10); do
-                  ./runner --coin ${CoinType} --wallet ${WalletAddress}
-                  sleep 10
-                done > /tmp/runner.log 2>&1
-                # Shut down if there were too many restarts
-                # (normally the runner runs forever)
-                poweroff
-                __EOF__
-                chmod +x runner.sh
-                nohup ./runner.sh &
-              - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-aarch64.tar.gz
-                EtcminerArgs: "-U"
+  #LaunchTemplateCudaARM64:
+  #  Type: AWS::EC2::LaunchTemplate
+  #  Properties:
+  #    LaunchTemplateData:
+  #      IamInstanceProfile:
+  #        Arn: !GetAtt InstanceProfile.Arn
+  #      ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaARM64 ]
+  #      UserData:
+  #        'Fn::Base64':
+  #          'Fn::Sub':
+  #            - |
+  #              %%{user-data-runner.txt}%%
+  #            - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-aarch64.tar.gz
+  #              EtcminerArgs: "-U"
 
   LaunchTemplateDeepLearning:
     Type: AWS::EC2::LaunchTemplate
