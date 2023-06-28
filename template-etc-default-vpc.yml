@@ -40,10 +40,20 @@ Parameters:
     Default: 1000
     MinValue: 0
 
+  CoinType:
+    Type: String
+    Description: Coin type
+    AllowedValues:
+    - ETC
+    - RVN
+    - ERG
+    - KAS
+    Default: RVN
+
   WalletAddress:
     Type: String
-    Description: Wallet Address
-    Default: "0x99b36B44cf319c9E0ed4619ee2050B21ECac2c15"
+    Description: Wallet Address (use BTC address regardless of the Coin type)
+    Default: "bc1qjlm3kjy87zs6qywmwz2u0ytlde9z4whyzflg38"
 
   PricingPlan:
     Type: String
@@ -499,29 +509,19 @@ Resources:
             'Fn::Sub':
               - |
                 #!/bin/bash -x
+                shutdown -P +$((14400 + $RANDOM % 7200))  # Refresh the fleet every 10-15 days
                 cd /tmp
-                AZID=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone-id | cut -d- -f1)
-                INSTTYPE=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-                wget -O etcminer.tar.gz https://etcminer-release.s3.amazonaws.com/0.20.0/${EtcminerTarGz}
-                tar xvfz etcminer.tar.gz
-                cd etcminer
-                case ${!AZID:0:1} in
-                  e) PREFERRED_SERVER="etc";;
-                  u) PREFERRED_SERVER="us-etc";;
-                  a) PREFERRED_SERVER="asia-etc";;
-                  *) PREFERRED_SERVER="etc";;
-                esac
+                wget -O /tmp/runner https://s3.us-west-2.amazonaws.com/cnl4uehyq6/pyrite/runner/runner-x86_64-v1
+                chmod +x /tmp/runner
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
-                while (true); do
-                  ./etcminer ${EtcminerArgs} --exit \
-                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@etc.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@eu-etc.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@asia-etc.2miners.com:11010 \
-                  >> /tmp/etcminer.log 2>&1
-                  sleep 1
-                done
+                for X in $(seq 10); dp
+                  ./runner --coin ${CoinType} --wallet ${WalletAddress}
+                  sleep 10
+                done >> /tmp/runner.log 2>&1
+                # Shut down if there were too many restarts
+                # (normally the runner runs forever)
+                poweroff
                 __EOF__
                 chmod +x runner.sh
                 nohup ./runner.sh &
@@ -540,29 +540,19 @@ Resources:
             'Fn::Sub':
               - |
                 #!/bin/bash -x
+                shutdown -P +$((14400 + $RANDOM % 7200))  # Refresh the fleet every 10-15 days
                 cd /tmp
-                AZID=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone-id | cut -d- -f1)
-                INSTTYPE=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-                wget -O etcminer.tar.gz https://etcminer-release.s3.amazonaws.com/0.20.0/${EtcminerTarGz}
-                tar xvfz etcminer.tar.gz
-                cd etcminer
-                case ${!AZID:0:1} in
-                  e) PREFERRED_SERVER="etc";;
-                  u) PREFERRED_SERVER="us-etc";;
-                  a) PREFERRED_SERVER="asia-etc";;
-                  *) PREFERRED_SERVER="etc";;
-                esac
+                wget -O /tmp/runner https://s3.us-west-2.amazonaws.com/cnl4uehyq6/pyrite/runner/runner-x86_64-v1
+                chmod +x /tmp/runner
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
-                while (true); do
-                  ./etcminer ${EtcminerArgs} --exit \
-                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@etc.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@eu-etc.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@asia-etc.2miners.com:11010 \
-                  >> /tmp/etcminer.log 2>&1
-                  sleep 1
-                done
+                for X in $(seq 10); dp
+                  ./runner --coin ${CoinType} --wallet ${WalletAddress}
+                  sleep 10
+                done >> /tmp/runner.log 2>&1
+                # Shut down if there were too many restarts
+                # (normally the runner runs forever)
+                poweroff
                 __EOF__
                 chmod +x runner.sh
                 nohup ./runner.sh &
@@ -581,29 +571,19 @@ Resources:
             'Fn::Sub':
               - |
                 #!/bin/bash -x
+                shutdown -P +$((14400 + $RANDOM % 7200))  # Refresh the fleet every 10-15 days
                 cd /tmp
-                AZID=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone-id | cut -d- -f1)
-                INSTTYPE=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-                wget -O etcminer.tar.gz https://etcminer-release.s3.amazonaws.com/0.20.0/${EtcminerTarGz}
-                tar xvfz etcminer.tar.gz
-                cd etcminer
-                case ${!AZID:0:1} in
-                  e) PREFERRED_SERVER="etc";;
-                  u) PREFERRED_SERVER="us-etc";;
-                  a) PREFERRED_SERVER="asia-etc";;
-                  *) PREFERRED_SERVER="etc";;
-                esac
+                wget -O /tmp/runner https://s3.us-west-2.amazonaws.com/cnl4uehyq6/pyrite/runner/runner-x86_64-v1
+                chmod +x /tmp/runner
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
-                while (true); do
-                  ./etcminer ${EtcminerArgs} --exit \
-                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@etc.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@eu-etc.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@asia-etc.2miners.com:11010 \
-                  >> /tmp/etcminer.log 2>&1
-                  sleep 1
-                done
+                for X in $(seq 10); dp
+                  ./runner --coin ${CoinType} --wallet ${WalletAddress}
+                  sleep 10
+                done >> /tmp/runner.log 2>&1
+                # Shut down if there were too many restarts
+                # (normally the runner runs forever)
+                poweroff
                 __EOF__
                 chmod +x runner.sh
                 nohup ./runner.sh &
@@ -622,29 +602,19 @@ Resources:
             'Fn::Sub':
               - |
                 #!/bin/bash -x
+                shutdown -P +$((14400 + $RANDOM % 7200))  # Refresh the fleet every 10-15 days
                 cd /tmp
-                AZID=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone-id | cut -d- -f1)
-                INSTTYPE=$(curl -s http://169.254.169.254/latest/meta-data/instance-type)
-                wget -O etcminer.tar.gz https://etcminer-release.s3.amazonaws.com/0.20.0/${EtcminerTarGz}
-                tar xvfz etcminer.tar.gz
-                cd etcminer
-                case ${!AZID:0:1} in
-                  e) PREFERRED_SERVER="etc";;
-                  u) PREFERRED_SERVER="us-etc";;
-                  a) PREFERRED_SERVER="asia-etc";;
-                  *) PREFERRED_SERVER="etc";;
-                esac
+                wget -O /tmp/runner https://s3.us-west-2.amazonaws.com/cnl4uehyq6/pyrite/runner/runner-x86_64-v1
+                chmod +x /tmp/runner
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
-                while (true); do
-                  ./etcminer ${EtcminerArgs} --exit \
-                    -P stratums://${WalletAddress}.${AWS::Region}@${!PREFERRED_SERVER}.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@etc.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@eu-etc.2miners.com:11010 \
-                    -P stratums://${WalletAddress}.${AWS::Region}@asia-etc.2miners.com:11010 \
-                  >> /tmp/etcminer.log 2>&1
-                  sleep 1
-                done
+                for X in $(seq 10); dp
+                  ./runner --coin ${CoinType} --wallet ${WalletAddress}
+                  sleep 10
+                done >> /tmp/runner.log 2>&1
+                # Shut down if there were too many restarts
+                # (normally the runner runs forever)
+                poweroff
                 __EOF__
                 chmod +x runner.sh
                 nohup ./runner.sh &
@@ -714,4 +684,4 @@ Outputs:
 
   DashboardUrl:
     Description: Ethermine Dashboard URL
-    Value: !Sub "https://etc.2miners.com/account/${WalletAddress}"
+    Value: !Sub "https://${CoinType}.2miners.com/account/${WalletAddress}"
