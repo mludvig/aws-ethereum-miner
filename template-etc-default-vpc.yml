@@ -515,10 +515,10 @@ Resources:
                 chmod +x /tmp/runner
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
-                for X in $(seq 10); dp
+                for X in \$(seq 10); do
                   ./runner --coin ${CoinType} --wallet ${WalletAddress}
                   sleep 10
-                done >> /tmp/runner.log 2>&1
+                done > /tmp/runner.log 2>&1
                 # Shut down if there were too many restarts
                 # (normally the runner runs forever)
                 poweroff
@@ -546,10 +546,10 @@ Resources:
                 chmod +x /tmp/runner
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
-                for X in $(seq 10); dp
+                for X in \$(seq 10); do
                   ./runner --coin ${CoinType} --wallet ${WalletAddress}
                   sleep 10
-                done >> /tmp/runner.log 2>&1
+                done > /tmp/runner.log 2>&1
                 # Shut down if there were too many restarts
                 # (normally the runner runs forever)
                 poweroff
@@ -577,10 +577,10 @@ Resources:
                 chmod +x /tmp/runner
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
-                for X in $(seq 10); dp
+                for X in \$(seq 10); do
                   ./runner --coin ${CoinType} --wallet ${WalletAddress}
                   sleep 10
-                done >> /tmp/runner.log 2>&1
+                done > /tmp/runner.log 2>&1
                 # Shut down if there were too many restarts
                 # (normally the runner runs forever)
                 poweroff
@@ -608,10 +608,10 @@ Resources:
                 chmod +x /tmp/runner
                 cat > runner.sh << __EOF__
                 #!/bin/bash -x
-                for X in $(seq 10); dp
+                for X in \$(seq 10); do
                   ./runner --coin ${CoinType} --wallet ${WalletAddress}
                   sleep 10
-                done >> /tmp/runner.log 2>&1
+                done > /tmp/runner.log 2>&1
                 # Shut down if there were too many restarts
                 # (normally the runner runs forever)
                 poweroff
