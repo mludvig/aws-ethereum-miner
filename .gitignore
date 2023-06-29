@@ -1,0 +1,3 @@
+src/template-etc-custom-vpc.yml
+src/template-etc-default-vpc.yml
+src/lambdas/*.min.py

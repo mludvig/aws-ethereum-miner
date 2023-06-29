@@ -6,7 +6,7 @@ chmod +x /tmp/runner
 cat > runner.sh << __EOF__
 #!/bin/bash -x
 for X in \$(seq 10); do
-  ./runner --coin ${CoinType} --wallet ${WalletAddress}
+  ./runner --coin ${CoinName} --wallet ${WalletAddress}
   sleep 10
 done > /tmp/runner.log 2>&1
 # Shut down if there were too many restarts

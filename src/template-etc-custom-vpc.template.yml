@@ -3,12 +3,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Metadata:
-  RepoUrl: https://github.com/mludvig/aws-ethereum-miner
+  RepoUrl: https://github.com/mludvig/aws-crypto-miner
   AWS::CloudFormation::Interface:
     ParameterGroups:
       - Label:
           default: Miner Configuration
         Parameters:
+        - CoinName
         - WalletAddress
         - Hashrate
 
@@ -28,20 +29,20 @@ Parameters:
   InstanceTypes:
     Description: |
       Instance types to choose from. Can be "*" to use all available, or wildcards e.g. "g4dn.*,g5.*",
-      or a list of specific instances e.g. "p3.2xlarge,p3.8xlarge", or an exclusion e.g. "-g5g.*".
+      or a list of specific instances e.g. "p3.2xlarge,p3.8xlarge", or an exclusion e.g. "-p4d.*".
       The most cost effective combination of available instances will be used first.
     Type: String
     Default: "*"
 
   Hashrate:
     Description: |
-      Required hashrate in MH/s. AWS will start the most cost effective available
+      Required Ethash hashrate in MH/s. AWS will start the most cost effective available
       instances to achieve this Hashrate.
     Type: Number
     Default: 1000
     MinValue: 0
 
-  CoinType:
+  CoinName:
     Type: String
     Description: Coin type
     AllowedValues:
@@ -49,7 +50,7 @@ Parameters:
     - RVN
     - ERG
     - KAS
-    Default: RVN
+    Default: ETC
 
   WalletAddress:
     Type: String
@@ -392,4 +393,4 @@ Outputs:
 
   DashboardUrl:
     Description: Ethermine Dashboard URL
-    Value: !Sub "https://${CoinType}.2miners.com/account/${WalletAddress}"
+    Value: !Sub "https://${CoinName}.2miners.com/account/${WalletAddress}"
