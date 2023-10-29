@@ -1,4 +1,4 @@
-# Use this template if you wish to stand up the instances in a custom VPC
+# Use this template if you wish to stand up the instances in the "Default VPC"
 
 AWSTemplateFormatVersion: '2010-09-09'
 
@@ -18,12 +18,6 @@ Metadata:
         Parameters:
         - InstanceTypes
         - PricingPlan
-
-      - Label:
-          default: Networking Configuration
-        Parameters:
-        - VpcId
-        - SubnetIds
 
 Parameters:
   InstanceTypes:
@@ -46,11 +40,11 @@ Parameters:
     Type: String
     Description: Coin type
     AllowedValues:
-    - ETC
     - RVN
     - ERG
     - KAS
-    Default: ETC
+    - ETC
+    Default: RVN
 
   WalletAddress:
     Type: String
@@ -65,14 +59,6 @@ Parameters:
     - ondemand
     - both
     Default: both
-
-  VpcId:
-    Description: The VPC where this stack will be deployed
-    Type: AWS::EC2::VPC::Id
-
-  SubnetIds:
-    Description: The subnets where the instances will be deployed - at least 3 subnets!
-    Type: List<AWS::EC2::Subnet::Id>
 
 Mappings:
   ImageMap:
@@ -177,9 +163,6 @@ Resources:
       Runtime: python3.9
       Timeout: 10
       Role: !GetAtt LambdaExecutionRole.Arn
-      Environment:
-        Variables:
-          VPC_ID: !Ref VpcId
 
   AsgUpdater:
     DependsOn:
@@ -259,8 +242,6 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", CudaX8664 ]
-        SecurityGroupIds:
-        - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
             'Fn::Sub':
@@ -276,8 +257,6 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", RadeonX8664 ]
-        SecurityGroupIds:
-        - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
             'Fn::Sub':
@@ -308,8 +287,6 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt InstanceProfile.Arn
         ImageId: !FindInMap [ ImageMap, !Ref "AWS::Region", DeepLearning ]
-        SecurityGroupIds:
-        - !Ref SecurityGroup
         UserData:
           'Fn::Base64':
             'Fn::Sub':
@@ -317,18 +294,6 @@ Resources:
                 %%{user-data-runner.txt}%%
               - EtcminerTarGz: etcminer-0.20.0-cuda-11-opencl-linux-x86_64.tar.gz
                 EtcminerArgs: "-U"
-
-  SecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: !Ref AWS::StackName
-      VpcId: !Ref VpcId
-      SecurityGroupEgress:
-      - IpProtocol: -1
-        CidrIp: 0.0.0.0/0
-      Tags:
-      - Key: Name
-        Value: !Ref AWS::StackName
 
   Asg:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -350,7 +315,7 @@ Resources:
       MaxSize: !Ref Hashrate
       DesiredCapacity: 0      # This will be updated by AsgUpdater a little later
       CapacityRebalance: true
-      VPCZoneIdentifier: !Ref SubnetIds
+      AvailabilityZones: !GetAZs ""
       HealthCheckGracePeriod: 900
       HealthCheckType: EC2
       MetricsCollection:

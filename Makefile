@@ -1,13 +1,13 @@
-ALL := template-etc-default-vpc.yml template-etc-custom-vpc.yml
+ALL := template-default-vpc.yml template-custom-vpc.yml
 
 .PHONY: src
 
 all: ${ALL}
 
-template-etc-default-vpc.yml: src
+template-default-vpc.yml: src
 	ln -fv src/$@ $@
 
-template-etc-custom-vpc.yml: src
+template-custom-vpc.yml: src
 	ln -fv src/$@ $@
 
 src:
